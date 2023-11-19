@@ -1,0 +1,131 @@
+edition: 1.0.0
+name: esignservice
+# access 是当前应用所需要的密钥信息配置：
+# 密钥配置可以参考：https://www.serverless-devs.com/serverless-devs/command/config
+# 密钥使用顺序可以参考：https://www.serverless-devs.com/serverless-devs/tool#密钥使用顺序与规范
+access: "ali-swretail" # default
+
+vars: # 全局变量
+  region: cn-hangzhou
+  service:
+    name: esignservice
+    description: 'esign service faas'
+
+services:
+  func_fileupload: # 业务名称/模块名称
+    # 如果只想针对 esignservice 下面的业务进行相关操作，可以在命令行中加上 esignservice，例如：
+    # 只对esignservice进行构建：s esignservice build
+    # 如果不带有 esignservice ，而是直接执行 s build，工具则会对当前Yaml下，所有和 esignservice 平级的业务模块（如有其他平级的模块，例如下面注释的next-function），按照一定顺序进行 build 操作
+    component: fc # 组件名称，Serverless Devs 工具本身类似于一种游戏机，不具备具体的业务能力，组件类似于游戏卡，用户通过向游戏机中插入不同的游戏卡实现不同的功能，即通过使用不同的组件实现不同的具体业务能力
+    internetAccess: true
+    logConfig:
+      enableRequestMetrics: true
+      enableInstanceMetrics: true
+      logBeginRule: DefaultRegex
+      project: aliyun-fc-cn-hangzhou-ad6c5d74-02d1-5afc-9075-ef95f91a2327
+      logstore: function-log
+    actions: # 自定义执行逻辑，关于actions 的使用，可以参考：https://www.serverless-devs.com/serverless-devs/yaml#行为描述
+      pre-deploy: # 在deploy之前运行
+        - run: mvn package
+          path: ./
+    #        - component: fc build --use-docker --dockerfile ./code/Dockerfile  # 要运行的组件，格式为【component: 组件名 命令 参数】（可以通过s cli registry search --type Component 获取组件列表）
+    #        - run: docker build xxx          # 要执行的系统命令，类似于一种钩子的形式
+    #          path: ./src                    # 执行系统命令/钩子的路径
+    #        - plugin: myplugin               # 与运行的插件 （可以通过s cli registry search --type Plugin 获取组件列表）
+    #          args:                          # 插件的参数信息
+    #            testKey: testValue
+    #      post-deploy: # 在deploy之后运行
+    #        - component: fc versions publish # 要运行的命令行
+    props:
+      region: ${vars.region} # 关于变量的使用方法，可以参考：https://www.serverless-devs.com/serverless-devs/yaml#变量赋值
+      service: ${vars.service}
+      function:
+        name: fileupload
+        description: '文件计算md5并获取esign上传成功获得fileid，filename'
+        environmentVariables: {"TZ":"Asia/Shanghai","app_authorize":"BRFBN0001"}
+        runtime: java11
+        codeUri: ./target
+        handler: com.wisepaas.esignservice.FileUpload::handleRequest
+        memorySize: 256
+        diskSize: 512
+        cpu: 0.25
+        instanceConcurrency: 10
+        timeout: 60
+        # initializationTimeout: 60
+        # initializer: example.App::initialize
+      triggers:
+        - name: httpTrigger1
+          type: http
+          config:
+            authType: anonymous
+            # authType: function
+            disableURLInternet: false
+            methods:
+              - GET
+      customDomains:
+        - domainName: auto
+          protocol: HTTP
+          routeConfigs:
+            - path: /fileupload
+              methods:
+                - GET
+                - POST
+
+  func_usercheck: # 业务名称/模块名称
+    # 如果只想针对 esignservice 下面的业务进行相关操作，可以在命令行中加上 esignservice，例如：
+    # 只对esignservice进行构建：s esignservice build
+    # 如果不带有 esignservice ，而是直接执行 s build，工具则会对当前Yaml下，所有和 esignservice 平级的业务模块（如有其他平级的模块，例如下面注释的next-function），按照一定顺序进行 build 操作
+    component: fc # 组件名称，Serverless Devs 工具本身类似于一种游戏机，不具备具体的业务能力，组件类似于游戏卡，用户通过向游戏机中插入不同的游戏卡实现不同的功能，即通过使用不同的组件实现不同的具体业务能力
+    internetAccess: true
+    logConfig:
+      enableRequestMetrics: true
+      enableInstanceMetrics: true
+      logBeginRule: DefaultRegex
+      project: aliyun-fc-cn-hangzhou-ad6c5d74-02d1-5afc-9075-ef95f91a2327
+      logstore: function-log
+    actions: # 自定义执行逻辑，关于actions 的使用，可以参考：https://www.serverless-devs.com/serverless-devs/yaml#行为描述
+      pre-deploy: # 在deploy之前运行
+        - run: mvn package
+          path: ./
+    #        - component: fc build --use-docker --dockerfile ./code/Dockerfile  # 要运行的组件，格式为【component: 组件名 命令 参数】（可以通过s cli registry search --type Component 获取组件列表）
+    #        - run: docker build xxx          # 要执行的系统命令，类似于一种钩子的形式
+    #          path: ./src                    # 执行系统命令/钩子的路径
+    #        - plugin: myplugin               # 与运行的插件 （可以通过s cli registry search --type Plugin 获取组件列表）
+    #          args:                          # 插件的参数信息
+    #            testKey: testValue
+    #      post-deploy: # 在deploy之后运行
+    #        - component: fc versions publish # 要运行的命令行
+    props:
+      region: ${vars.region} # 关于变量的使用方法，可以参考：https://www.serverless-devs.com/serverless-devs/yaml#变量赋值
+      service: ${vars.service}
+      function:
+        name: usercheck
+        description: '测试API调通'
+        environmentVariables: {"TZ":"Asia/Shanghai","app_authorize":"BRFBN0001"}
+        runtime: java11
+        codeUri: ./target
+        handler: com.wisepaas.esignservice.UserCheck::handleRequest
+        memorySize: 128
+        diskSize: 512
+        cpu: 0.1
+        instanceConcurrency: 1
+        timeout: 60
+        # initializationTimeout: 60
+        # initializer: example.App::initialize
+      triggers:
+        - name: httpTrigger2
+          type: http
+          config:
+            authType: anonymous
+            # authType: function
+            disableURLInternet: false
+            methods:
+              - GET
+      customDomains:
+        - domainName: auto
+          protocol: HTTP
+          routeConfigs:
+            - path: /usercheck
+              methods:
+                - GET
+                - POST
