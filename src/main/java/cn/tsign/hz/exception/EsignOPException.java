@@ -5,20 +5,20 @@ package cn.tsign.hz.exception;
  * 
  * datetime 2019年7月1日上午10:43:24
  */
-public class EsignDemoException extends Exception {
+public class EsignOPException extends Exception {
 
 	private static final long serialVersionUID = 4359180081622082792L;
 	private Exception e;
 
-	public EsignDemoException(String msg) {
+	public EsignOPException(String msg) {
 		super(msg);
 	}
 
-	public EsignDemoException(String msg, Throwable cause) {
+	public EsignOPException(String msg, Throwable cause) {
 		super(msg,cause);
 	}
 
-	public EsignDemoException(){
+	public EsignOPException(){
 
 	}
 

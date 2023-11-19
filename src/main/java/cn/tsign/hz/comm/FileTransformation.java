@@ -11,7 +11,7 @@
  */
 package cn.tsign.hz.comm;
 
-import cn.tsign.hz.exception.EsignDemoException;
+import cn.tsign.hz.exception.EsignOPException;
 import org.apache.commons.codec.binary.Base64;
 
 import java.io.*;
@@ -35,9 +35,9 @@ public class FileTransformation {
      *
      * @param srcFilePath 本地文件路径
      * @return
-     * @throws EsignDemoException
+     * @throws EsignOPException
      */
-    public static byte[] fileToBytes(String srcFilePath) throws EsignDemoException {
+    public static byte[] fileToBytes(String srcFilePath) throws EsignOPException {
         return getBytes(srcFilePath);
     }
 
@@ -46,9 +46,9 @@ public class FileTransformation {
      *
      * @param filePath 本地文件路径
      * @return
-     * @throws EsignDemoException
+     * @throws EsignOPException
      */
-    public static String fileToBase64(String filePath) throws EsignDemoException {
+    public static String fileToBase64(String filePath) throws EsignOPException {
         byte[] bytes;
         String base64 = null;
         bytes = fileToBytes(filePath);
@@ -57,7 +57,7 @@ public class FileTransformation {
         return base64;
     }
 
-    public static void main(String[] args) throws EsignDemoException {
+    public static void main(String[] args) throws EsignOPException {
         System.out.println(getFileContentMD5("D:\\文档\\PLT2022-02124CT.pdf"));
     }
 
@@ -66,7 +66,7 @@ public class FileTransformation {
      * @param filePath 文件路径
      * @return
      */
-    public static String getFileContentMD5(String filePath) throws EsignDemoException {
+    public static String getFileContentMD5(String filePath) throws EsignOPException {
         // 获取文件MD5的二进制数组（128位）
         byte[] bytes = getFileMD5Bytes128(filePath);
         // 对文件MD5的二进制数组进行base64编码
@@ -79,7 +79,7 @@ public class FileTransformation {
      * @param httpUrl 网络文件地址url
      * @return
      */
-    public static boolean downLoadFileByUrl(String httpUrl, String dir) throws EsignDemoException {
+    public static boolean downLoadFileByUrl(String httpUrl, String dir) throws EsignOPException {
         InputStream fis = null;
         FileOutputStream fileOutputStream = null;
         try {
@@ -96,7 +96,7 @@ public class FileTransformation {
                 fileOutputStream.write(buffer, 0, length);
             }
         } catch (IOException e) {
-            EsignDemoException ex = new EsignDemoException("获取文件流异常", e);
+            EsignOPException ex = new EsignOPException("获取文件流异常", e);
             ex.initCause(e);
             throw ex;
         } finally {
@@ -108,7 +108,7 @@ public class FileTransformation {
                     fileOutputStream.close();
                 }
             } catch (IOException e) {
-                EsignDemoException ex = new EsignDemoException("关闭文件流异常", e);
+                EsignOPException ex = new EsignOPException("关闭文件流异常", e);
                 ex.initCause(e);
                 throw ex;
             }
@@ -123,7 +123,7 @@ public class FileTransformation {
      * @param fileUrl 网络文件地址url
      * @return
      */
-    public static Map fileUrlToBytes(String fileUrl) throws EsignDemoException {
+    public static Map fileUrlToBytes(String fileUrl) throws EsignOPException {
         HashMap<String, Object> map = new HashMap<String, Object>();
         try {
             URL url = new URL(fileUrl);
@@ -148,11 +148,11 @@ public class FileTransformation {
             fis.close();
             map.put("md5Bytes", md5Bytes);
         } catch (IOException e) {
-            EsignDemoException ex = new EsignDemoException("获取文件流异常", e);
+            EsignOPException ex = new EsignOPException("获取文件流异常", e);
             ex.initCause(e);
             throw ex;
         } catch (NoSuchAlgorithmException e) {
-            EsignDemoException ex = new EsignDemoException("文件计算异常", e);
+            EsignOPException ex = new EsignOPException("文件计算异常", e);
             ex.initCause(e);
             throw ex;
         }
@@ -163,9 +163,9 @@ public class FileTransformation {
      * 获取文件MD5的二进制数组（128位）
      * @param filePath
      * @return
-     * @throws EsignDemoException
+     * @throws EsignOPException
      */
-    public static byte[] getFileMD5Bytes128(String filePath) throws EsignDemoException {
+    public static byte[] getFileMD5Bytes128(String filePath) throws EsignOPException {
         FileInputStream fis = null;
         byte[] md5Bytes = null;
         try {
@@ -180,15 +180,15 @@ public class FileTransformation {
             md5Bytes = md5.digest();
             fis.close();
         } catch (FileNotFoundException e) {
-            EsignDemoException ex = new EsignDemoException("文件找不到", e);
+            EsignOPException ex = new EsignOPException("文件找不到", e);
             ex.initCause(e);
             throw ex;
         } catch (NoSuchAlgorithmException e) {
-            EsignDemoException ex = new EsignDemoException("不支持此算法", e);
+            EsignOPException ex = new EsignOPException("不支持此算法", e);
             ex.initCause(e);
             throw ex;
         } catch (IOException e) {
-            EsignDemoException ex = new EsignDemoException("输入流或输出流异常", e);
+            EsignOPException ex = new EsignOPException("输入流或输出流异常", e);
             ex.initCause(e);
             throw ex;
         } finally {
@@ -196,7 +196,7 @@ public class FileTransformation {
                 try {
                     fis.close();
                 } catch (IOException e) {
-                    EsignDemoException ex = new EsignDemoException("关闭文件输入流失败", e);
+                    EsignOPException ex = new EsignOPException("关闭文件输入流失败", e);
                     ex.initCause(e);
                     throw ex;
                 }
@@ -208,12 +208,12 @@ public class FileTransformation {
     /**
      * @param path
      * @return
-     * @throws EsignDemoException
+     * @throws EsignOPException
      * @description 根据文件路径，获取文件base64
      * @author 宫清
      * @date 2019年7月21日 下午4:22:08
      */
-    public static String getBase64Str(String path) throws EsignDemoException {
+    public static String getBase64Str(String path) throws EsignOPException {
         InputStream is = null;
         try {
             is = new FileInputStream(new File(path));
@@ -221,7 +221,7 @@ public class FileTransformation {
             is.read(bytes);
             return Base64.encodeBase64String(bytes);
         } catch (Exception e) {
-            EsignDemoException ex = new EsignDemoException("获取文件输入流失败", e);
+            EsignOPException ex = new EsignOPException("获取文件输入流失败", e);
             ex.initCause(e);
             throw ex;
         } finally {
@@ -229,7 +229,7 @@ public class FileTransformation {
                 try {
                     is.close();
                 } catch (IOException e) {
-                    EsignDemoException ex = new EsignDemoException("关闭文件输入流失败", e);
+                    EsignOPException ex = new EsignOPException("关闭文件输入流失败", e);
                     ex.initCause(e);
                     throw ex;
                 }
@@ -251,12 +251,12 @@ public class FileTransformation {
     /**
      * @param filePath {@link String} 文件地址
      * @return
-     * @throws EsignDemoException
+     * @throws EsignOPException
      * @description 获取文件字节流
      * @date 2019年7月10日 上午9:17:00
      * @author 宫清
      */
-    public static byte[] getBytes(String filePath) throws EsignDemoException {
+    public static byte[] getBytes(String filePath) throws EsignOPException {
         File file = new File(filePath);
         FileInputStream fis = null;
         byte[] buffer = null;
@@ -265,7 +265,7 @@ public class FileTransformation {
             buffer = new byte[(int) file.length()];
             fis.read(buffer);
         } catch (Exception e) {
-            EsignDemoException ex = new EsignDemoException("获取文件字节流失败", e);
+            EsignOPException ex = new EsignOPException("获取文件字节流失败", e);
             ex.initCause(e);
             throw ex;
         } finally {
@@ -273,7 +273,7 @@ public class FileTransformation {
                 try {
                     fis.close();
                 } catch (IOException e) {
-                    EsignDemoException ex = new EsignDemoException("关闭文件字节流失败", e);
+                    EsignOPException ex = new EsignOPException("关闭文件字节流失败", e);
                     ex.initCause(e);
                     throw ex;
                 }

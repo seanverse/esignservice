@@ -1,6 +1,6 @@
 package cn.tsign.hz.comm;
 
-import cn.tsign.hz.exception.EsignDemoException;
+import cn.tsign.hz.exception.EsignOPException;
 
 import java.io.File;
 
@@ -21,12 +21,12 @@ public class EsignFileBean {
     private String filePath;
 
 
-    public EsignFileBean(String filePath) throws EsignDemoException {
+    public EsignFileBean(String filePath) throws EsignOPException {
             this.filePath=filePath;
             this.fileContentMD5 = FileTransformation.getFileContentMD5(filePath);
             File file = new File(filePath);
             if (!file.exists()) {
-                throw new EsignDemoException("文件不存在");
+                throw new EsignOPException("文件不存在");
             }
             this.fileName = file.getName();
             this.fileSize = (int) file.length();
@@ -47,9 +47,9 @@ public class EsignFileBean {
     /**
      * 传入本地文件地址获取二进制数据
      * @return
-     * @throws EsignDemoException
+     * @throws EsignOPException
      */
-    public byte[] getFileBytes() throws EsignDemoException {
+    public byte[] getFileBytes() throws EsignOPException {
         return FileTransformation.fileToBytes(filePath);
     }
 }

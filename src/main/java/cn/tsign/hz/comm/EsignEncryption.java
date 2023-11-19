@@ -11,7 +11,7 @@
  */
 package cn.tsign.hz.comm;
 
-import cn.tsign.hz.exception.EsignDemoException;
+import cn.tsign.hz.exception.EsignOPException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.message.BasicNameValuePair;
 
@@ -44,7 +44,7 @@ public class EsignEncryption {
      * @param url
      * @return
      */
-    public static String appendSignDataString(String httpMethod, String contentMd5,String accept,String contentType,String headers,String date, String url) throws EsignDemoException {
+    public static String appendSignDataString(String httpMethod, String contentMd5,String accept,String contentType,String headers,String date, String url) throws EsignOPException {
         StringBuffer sb = new StringBuffer();
         sb.append(httpMethod).append("\n").append(accept).append("\n").append(contentMd5).append("\n")
                 .append(contentType).append("\n");
@@ -66,9 +66,9 @@ public class EsignEncryption {
      *  Content-MD5的计算方法
      * @param str 待计算的消息
      * @return MD5计算后摘要值的Base64编码(ContentMD5)
-     * @throws EsignDemoException 加密过程中的异常信息
+     * @throws EsignOPException 加密过程中的异常信息
      */
-    public static String doContentMD5(String str) throws EsignDemoException {
+    public static String doContentMD5(String str) throws EsignOPException {
         byte[] md5Bytes = null;
         MessageDigest md5 = null;
         String contentMD5 = null;
@@ -82,7 +82,7 @@ public class EsignEncryption {
             contentMD5 = Base64.encodeBase64String(md5Bytes);
 
         } catch (NoSuchAlgorithmException e) {
-            EsignDemoException ex = new EsignDemoException("不支持此算法",e);
+            EsignOPException ex = new EsignOPException("不支持此算法",e);
             ex.initCause(e);
             throw ex;
         } catch (UnsupportedEncodingException e) {
@@ -96,9 +96,9 @@ public class EsignEncryption {
      * @param message 待签名字符串
      * @param secret  密钥APP KEY
      * @return reqSignature HmacSHA256计算后摘要值的Base64编码
-     * @throws EsignDemoException 加密过程中的异常信息
+     * @throws EsignOPException 加密过程中的异常信息
      */
-    public static String doSignatureBase64(String message, String secret) throws EsignDemoException {
+    public static String doSignatureBase64(String message, String secret) throws EsignOPException {
         String algorithm = "HmacSHA256";
         Mac hmacSha256;
         String digestBase64 = null;
@@ -112,11 +112,11 @@ public class EsignEncryption {
             // 把摘要后的结果digestBytes使用Base64进行编码
             digestBase64 = Base64.encodeBase64String(digestBytes);
         } catch (NoSuchAlgorithmException e) {
-            EsignDemoException ex = new EsignDemoException("不支持此算法",e);
+            EsignOPException ex = new EsignOPException("不支持此算法",e);
             ex.initCause(e);
             throw ex;
         } catch (InvalidKeyException e) {
-            EsignDemoException ex = new EsignDemoException("无效的密钥规范",e);
+            EsignOPException ex = new EsignOPException("无效的密钥规范",e);
             ex.initCause(e);
             throw ex;
         } catch (UnsupportedEncodingException e) {
@@ -155,7 +155,7 @@ public class EsignEncryption {
      * hash散列加密算法
      * @return
      */
-    public static String Hmac_SHA256(String message,String key) throws EsignDemoException {
+    public static String Hmac_SHA256(String message,String key) throws EsignOPException {
         byte[] rawHmac=null;
         try {
             SecretKeySpec sk = new SecretKeySpec(key.getBytes(), "HmacSHA256");
@@ -163,15 +163,15 @@ public class EsignEncryption {
             mac.init(sk);
             rawHmac = mac.doFinal(message.getBytes());
         }catch (InvalidKeyException e){
-            EsignDemoException ex = new EsignDemoException("无效的密钥规范",e);
+            EsignOPException ex = new EsignOPException("无效的密钥规范",e);
             ex.initCause(e);
             throw ex;
         } catch (NoSuchAlgorithmException e) {
-            EsignDemoException ex = new EsignDemoException("不支持此算法",e);
+            EsignOPException ex = new EsignOPException("不支持此算法",e);
             ex.initCause(e);
             throw ex;
         }catch (Exception e){
-            EsignDemoException ex = new EsignDemoException("hash散列加密算法报错",e);
+            EsignOPException ex = new EsignOPException("hash散列加密算法报错",e);
             ex.initCause(e);
             throw ex;
         }finally {
@@ -183,14 +183,14 @@ public class EsignEncryption {
     /**
      * MD5加密32位
      */
-    public static String MD5Digest(String text) throws EsignDemoException {
+    public static String MD5Digest(String text) throws EsignOPException {
         byte[] digest=null;
         try {
             MessageDigest md5 = MessageDigest.getInstance("MD5");
             md5.update(text.getBytes());
             digest = md5.digest();
         }catch (NoSuchAlgorithmException e){
-            EsignDemoException ex = new EsignDemoException("不支持此算法",e);
+            EsignOPException ex = new EsignOPException("不支持此算法",e);
             ex.initCause(e);
             throw ex;
         }finally {
@@ -237,7 +237,7 @@ public class EsignEncryption {
      * @return 排序后的API接口地址
      * @throws Exception
      */
-    public static String sortApiUrl(String apiUrl) throws EsignDemoException {
+    public static String sortApiUrl(String apiUrl) throws EsignOPException {
 
         if (!apiUrl.contains("?")) {
             return apiUrl;
@@ -259,7 +259,7 @@ public class EsignEncryption {
             String value = str.substring(index + 1);
             if (queryParamsMap.containsKey(key)) {
                 String msg = MessageFormat.format("请求URL中的Query参数的{0}重复", key);
-                throw new EsignDemoException(msg);
+                throw new EsignOPException(msg);
             }
             queryParamsMap.put(key, value);
         }
@@ -301,9 +301,9 @@ public class EsignEncryption {
      *获取query
      * @param apiUrl
      * @return
-     * @throws EsignDemoException
+     * @throws EsignOPException
      */
-    public static ArrayList<BasicNameValuePair> getQuery(String apiUrl) throws EsignDemoException {
+    public static ArrayList<BasicNameValuePair> getQuery(String apiUrl) throws EsignOPException {
         ArrayList<BasicNameValuePair> BasicNameValuePairList = new ArrayList<>();
 
         if (!apiUrl.contains("?")) {
@@ -322,7 +322,7 @@ public class EsignEncryption {
             String value = str.substring(index + 1);
             if (queryParamsMap.containsKey(key)) {
                 String msg = MessageFormat.format("请求URL中的Query参数的{0}重复", key);
-                throw new EsignDemoException(msg);
+                throw new EsignOPException(msg);
             }
             BasicNameValuePairList.add(new BasicNameValuePair(key,value));
             queryParamsMap.put(key, value);

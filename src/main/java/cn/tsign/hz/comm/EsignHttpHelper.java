@@ -2,7 +2,7 @@ package cn.tsign.hz.comm;
 
 import cn.tsign.hz.enums.EsignHeaderConstant;
 import cn.tsign.hz.enums.EsignRequestType;
-import cn.tsign.hz.exception.EsignDemoException;
+import cn.tsign.hz.exception.EsignOPException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,10 +31,10 @@ public class EsignHttpHelper {
 	 * @param url 请求路径
 	 * @param paramStr 请求参数
 	 * @return
-	 * @throws EsignDemoException
+	 * @throws EsignOPException
 	 * 
 	 */
-	public static EsignHttpResponse doCommHttp(String host, String url,EsignRequestType reqType, Object paramStr ,Map<String,String> httpHeader,boolean debug) throws EsignDemoException {
+	public static EsignHttpResponse doCommHttp(String host, String url,EsignRequestType reqType, Object paramStr ,Map<String,String> httpHeader,boolean debug) throws EsignOPException {
 		return EsignHttpCfgHelper.sendHttp(reqType, host+url,httpHeader, paramStr, debug);
 	}
 
@@ -48,11 +48,11 @@ public class EsignHttpHelper {
 	 * @param fileContentMd5 文件fileContentMd5
 	 * @param contentType 文件MIME类型
 	 * @return
-	 * @throws EsignDemoException
+	 * @throws EsignOPException
 	 * 
 	 */
 	public static EsignHttpResponse doUploadHttp( String uploadUrl,EsignRequestType reqType,byte[] param, String fileContentMd5,
-												 String contentType, boolean debug) throws EsignDemoException {
+												 String contentType, boolean debug) throws EsignOPException {
 		Map<String, String> uploadHeader = buildUploadHeader(fileContentMd5, contentType);
 		if(debug){
 			LOGGER.info("----------------------------start------------------------");
@@ -89,7 +89,7 @@ public class EsignHttpHelper {
 	 *      *         charset}
 	 * @return
 	 */
-	public static Map<String,String> signAndBuildSignAndJsonHeader(String projectId, String secret,String paramStr,String httpMethod,String url,boolean debug) throws EsignDemoException {
+	public static Map<String,String> signAndBuildSignAndJsonHeader(String projectId, String secret,String paramStr,String httpMethod,String url,boolean debug) throws EsignOPException {
 		String contentMD5="";
 		//统一转大写处理
 		httpMethod = httpMethod.toUpperCase();
@@ -100,7 +100,7 @@ public class EsignHttpHelper {
 			//对body体做md5摘要
 			contentMD5=EsignEncryption.doContentMD5(paramStr);
 		}else{
-			throw new EsignDemoException(String.format("不支持的请求方法%s",httpMethod));
+			throw new EsignOPException(String.format("不支持的请求方法%s",httpMethod));
 		}
 		//构造一个初步的请求头
 		Map<String, String> esignHeaderMap = buildSignAndJsonHeader(projectId, contentMD5, EsignHeaderConstant.ACCEPT.VALUE(), EsignHeaderConstant.CONTENTTYPE_JSON.VALUE(), EsignHeaderConstant.AUTHMODE.VALUE());

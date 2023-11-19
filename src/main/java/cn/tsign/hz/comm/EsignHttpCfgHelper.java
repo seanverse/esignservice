@@ -11,7 +11,7 @@
  */
 package cn.tsign.hz.comm;
 import cn.tsign.hz.enums.EsignRequestType;
-import cn.tsign.hz.exception.EsignDemoException;
+import cn.tsign.hz.exception.EsignOPException;
 import org.apache.http.*;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -23,7 +23,6 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.ConnectTimeoutException;
@@ -39,7 +38,6 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
@@ -52,7 +50,6 @@ import java.net.UnknownHostException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -232,16 +229,16 @@ public class EsignHttpCfgHelper {
 	 * @param param
 	 * 			{@link Object} 参数
 	 * @return
-	 * @throws EsignDemoException
+	 * @throws EsignOPException
 	 * 
 	 */
 	public static EsignHttpResponse sendHttp(EsignRequestType reqType, String httpUrl, Map<String, String> headers, Object param, boolean debug)
-			throws EsignDemoException {
+			throws EsignOPException {
 		HttpRequestBase reqBase=null;
 		if(httpUrl.startsWith("http")){
 			reqBase=reqType.getHttpType(httpUrl);
 		}else{
-			throw new EsignDemoException("请求url地址格式错误");
+			throw new EsignOPException("请求url地址格式错误");
 		}
 		if(debug){
 			LOGGER.info("请求头:{}",headers+"\n");
@@ -294,29 +291,29 @@ public class EsignHttpCfgHelper {
 				LOGGER.info("----------------------------end------------------------");
 			}
 		} catch (NoHttpResponseException e) {
-			throw new EsignDemoException("服务器丢失了",e);
+			throw new EsignOPException("服务器丢失了",e);
 		} catch (SSLHandshakeException e){
 			String msg = MessageFormat.format("SSL握手异常", e);
-			EsignDemoException ex = new EsignDemoException(msg, e);
+			EsignOPException ex = new EsignOPException(msg, e);
 			throw ex;
 		} catch (UnknownHostException e){
-			EsignDemoException ex = new EsignDemoException("服务器找不到", e);
+			EsignOPException ex = new EsignOPException("服务器找不到", e);
 			ex.initCause(e);
 			throw ex;
 		} catch(ConnectTimeoutException e){
-			EsignDemoException ex = new EsignDemoException("连接超时", e);
+			EsignOPException ex = new EsignOPException("连接超时", e);
 			ex.initCause(e);
 			throw ex;
 		} catch(SSLException e){
-			EsignDemoException ex = new EsignDemoException("SSL异常",e);
+			EsignOPException ex = new EsignOPException("SSL异常",e);
 			ex.initCause(e);
 			throw ex;
 		} catch (ClientProtocolException e) {
-			EsignDemoException ex = new EsignDemoException("请求头异常",e);
+			EsignOPException ex = new EsignOPException("请求头异常",e);
 			ex.initCause(e);
 			throw ex;
 		} catch (IOException e) {
-			EsignDemoException ex = new EsignDemoException("网络请求失败",e);
+			EsignOPException ex = new EsignOPException("网络请求失败",e);
 			ex.initCause(e);
 			throw ex;
 		} finally {
@@ -324,7 +321,7 @@ public class EsignHttpCfgHelper {
 				try {
 					res.close();
 				} catch (IOException e) {
-					EsignDemoException ex = new EsignDemoException("--->>关闭请求响应失败",e);
+					EsignOPException ex = new EsignOPException("--->>关闭请求响应失败",e);
 					ex.initCause(e);
 					throw ex;
 				}
@@ -364,7 +361,7 @@ public class EsignHttpCfgHelper {
 	 * @return
 	 * 
 	 */
-	private static void cfgPoolMgr() throws EsignDemoException {
+	private static void cfgPoolMgr() throws EsignOPException {
 		ConnectionSocketFactory plainsf = PlainConnectionSocketFactory.getSocketFactory();
 		LayeredConnectionSocketFactory sslsf = SSLConnectionSocketFactory.getSocketFactory();
 		if(!SSL_VERIFY){
@@ -437,7 +434,7 @@ public class EsignHttpCfgHelper {
     /**
      * 忽略域名校验
      */
-    private static SSLConnectionSocketFactory sslConnectionSocketFactory() throws EsignDemoException {
+    private static SSLConnectionSocketFactory sslConnectionSocketFactory() throws EsignOPException {
         try {
             SSLContext ctx = SSLContext.getInstance("TLS");    // 创建一个上下文（此处指定的协议类型似乎不是重点）
             X509TrustManager tm = new X509TrustManager() {     // 创建一个跳过SSL证书的策略
@@ -454,7 +451,7 @@ public class EsignHttpCfgHelper {
             ctx.init(null, new TrustManager[] { tm }, null);    // 使用上面的策略初始化上下文
             return new SSLConnectionSocketFactory(ctx, new String[] { "SSLv3", "TLSv1", "TLSv1.1", "TLSv1.2" }, null, NoopHostnameVerifier.INSTANCE);
         }catch (Exception e){
-            EsignDemoException ex = new EsignDemoException("忽略域名校验失败",e);
+            EsignOPException ex = new EsignOPException("忽略域名校验失败",e);
             ex.initCause(e);
             throw ex;
         }
@@ -467,7 +464,7 @@ public class EsignHttpCfgHelper {
 	 * @return
 	 * 
 	 */
-	private static synchronized CloseableHttpClient getHttpClient() throws EsignDemoException {
+	private static synchronized CloseableHttpClient getHttpClient() throws EsignOPException {
 		if(httpClient==null) {
 			CredentialsProvider credsProvider = new BasicCredentialsProvider();
 			credsProvider.setCredentials(new AuthScope(PROXY_IP,PROXY_PORT),new UsernamePasswordCredentials(PROXY_USERNAME, PROXY_PASSWORD));
