@@ -1,9 +1,9 @@
 package cn.tsign.hz.comm;
+
 /**
  * 网络请求的response类
- * 
- * @date  2022/2/21 17:28
- * @version
+ *
+ * @date 2022/2/21 17:28
  */
 public class EsignHttpResponse {
     private int status;

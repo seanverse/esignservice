@@ -1,13 +1,17 @@
 # esign 对接程序部署安装说明
+
 本代码对接了esignv3 api并提供简易API供其他产品使用
 
 ## 准备开始
+
 - [可选] 安装并配置 Serverless Devs 工具。（https://help.aliyun.com/document_detail/195474.html）
 
 ## 快速开始
+
 ### 方式一、使用 Serverless Devs 工具编译部署
 
 #### 1. 修改 s.yaml 配置
+
 - 根据需要修改 access 配置
 - 根据需要修改 customDomain 自定义域名配置
 
@@ -17,14 +21,17 @@
 #### 2. 安装依赖并部署
 
 编译部署代码包
+
 ```shell
 s deploy
 ```
+
 > 注意: `pom.xml` 中有配置 `pre-deploy` 脚本 `mvn package`, 在部署前会调用 `mvn package` 编译打包。
 
 #### 3. 调用测试
 
 3.1. 使用 `s invoke` 测试
+
 ```shell
 s invoke
 ```
@@ -55,6 +62,7 @@ curl -H 'X-Fc-Log-Type: Tail' -i 'http://{FunctionName}.{ServiceName}.{AccountID
 ```
 
 收到响应如下所示(实际IP信息已隐藏)
+
 ```bash
 HTTP/1.1 200 OK
 Access-Control-Expose-Headers: Date,x-fc-request-id,x-fc-error-type,x-fc-code-checksum,x-fc-invocation-duration,x-fc-max-memory-usage,x-fc-log-result,x-fc-invocation-code-version
@@ -77,11 +85,13 @@ Path:
 ```
 
 返回Header中的 `X-Fc-Log-Result` 是base64编码的日志，可以在命令下使用`base64`解码
+
 ```bash
 $ echo RkMgSW52b2tlIFN0YXJ0IFJlcXVlc3RJZDogYzViYzI3MGUtMjI1OC00Y2FkLThmMWEtOTlmY2YxNjBkMzRhCkZDIEludm9rZSBFbmQgUmVxdWVzdElkOiBjNWJjMjcwZS0yMjU4LTRjYWQtOGYxYS05OWZjZjE2MGQzNGEKCkR1cmF0aW9uOiAzLjg3IG1zLCBCaWxsZWQgRHVyYXRpb246IDQgbXMsIE1lbW9yeSBTaXplOiAxMjggTUIsIE1heCBNZW1vcnkgVXNlZDogMTAwLjI2IE1C | base64 -d
 ```
 
 可以看到以下输出：
+
 ```bash
 FC Invoke Start RequestId: c5bc270e-2258-4cad-8f1a-99fcf160d34a
 FC Invoke End RequestId: c5bc270e-2258-4cad-8f1a-99fcf160d34a
@@ -101,7 +111,9 @@ cd target && zip -r java11-blank-http.zip *
 ```
 
 #### 2. 创建函数
+
 选择服务（或创建服务）后，单击创建函数，如图所示
+
 - 选择 `从零开始创建`
 - 填入函数名称
 - 选择运行环境 java11/java8
@@ -112,8 +124,8 @@ cd target && zip -r java11-blank-http.zip *
 
 > 详细创建函数流程见文档: [使用控制台创建函数](https://help.aliyun.com/document_detail/51783.html)
 
-
 #### 3. 配置测试参数
+
 在函数管理页面的测试函数标签栏配置测试参数
 
 ![img_2.png](assets/20220408143909.jpg)
@@ -121,6 +133,7 @@ cd target && zip -r java11-blank-http.zip *
 #### 4. 测试函数
 
 返回结果如下所示(实际IP信息已隐藏)
+
 ```bash
 Path: 
  Uri: /2016-08-15/proxy/fc-esignservice.LATEST/java11-blank-http/

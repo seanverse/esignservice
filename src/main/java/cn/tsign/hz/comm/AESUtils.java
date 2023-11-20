@@ -25,7 +25,7 @@ import java.security.NoSuchAlgorithmException;
 
 /**
  * AES对称加密工具类
- * 
+ *
  * @date 2019年7月18日
  */
 public class AESUtils {
@@ -54,7 +54,7 @@ public class AESUtils {
             System.arraycopy(encryptData, 0, message, 12, encryptData.length);
             return Base64.encodeBase64URLSafeString(message);
         } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
-                | BadPaddingException e) {
+                 | BadPaddingException e) {
             e.printStackTrace();
         }
         return null;
@@ -78,7 +78,7 @@ public class AESUtils {
             byte[] decryptData = cipher.doFinal(content, 12, content.length - 12);
             return new String(decryptData);
         } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
-                | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException e) {
+                 | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException e) {
             e.printStackTrace();
         }
         return null;

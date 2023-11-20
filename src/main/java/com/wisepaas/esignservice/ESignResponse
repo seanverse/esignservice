@@ -1,0 +1,27 @@
+package com.wisepaas.esignservice;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.Type;
+
+
+public class ESignResponse<T> {
+    private int code;
+    private String message;
+    private T data;
+
+    public int getCode() {
+        return code;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public T getData() {
+        return data;
+    }
+
+    public static <T> ESignResponse<T> fromJson(String json, Class<T> dataType) {
+        return ObjectMapperUtils.fromJson(json, dataType);
+    }
+}

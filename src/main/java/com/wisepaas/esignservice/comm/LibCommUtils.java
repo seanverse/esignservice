@@ -1,19 +1,17 @@
-package com.wisepaas.esignservice;
+package com.wisepaas.esignservice.comm;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import javax.servlet.http.HttpServletRequest;
+import java.io.*;
 import java.net.URL;
 
-public class ESignUtils {
-    private ESignUtils() {
-    }
+public class LibCommUtils {
+    private static final Logger LOGGER = LoggerFactory.getLogger(LibCommUtils.class);
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ESignUtils.class);
+    private LibCommUtils() {
+    }
 
     public static boolean checkAuthKey(RespAppParamBean appParam) {
         return appParam.getAuthKey() != null && !appParam.getAuthKey().isEmpty()
@@ -38,6 +36,22 @@ public class ESignUtils {
             if (LOGGER.isDebugEnabled())
                 LOGGER.debug("下载文件成功:{0}bits - {1}", totalBytes, filePath);
         }
+    }
+
+    public static String getReqBodyJson(HttpServletRequest request) throws IOException {
+        StringBuilder requestBody = new StringBuilder();
+        InputStream inputStream = request.getInputStream();
+
+        if (inputStream != null) {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    requestBody.append(line);
+                }
+            }
+        }
+
+        return requestBody.toString();
     }
 }
 

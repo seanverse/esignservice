@@ -2,6 +2,8 @@ package com.wisepaas.esignservice;
 
 import com.aliyun.fc.runtime.Context;
 import com.aliyun.fc.runtime.HttpRequestHandler;
+import com.wisepaas.esignservice.comm.LibCommUtils;
+import com.wisepaas.esignservice.comm.RespAppParamBean;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -9,13 +11,13 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
 
-public class UserCheck implements HttpRequestHandler {
+public class UserCheckHandle implements HttpRequestHandler {
 
     @Override
     public void handleRequest(HttpServletRequest request, HttpServletResponse response, Context context)
             throws IOException, ServletException {
         RespAppParamBean appParam = RespAppParamBean.fromReq(request);
-        if (!ESignUtils.checkAuthKey(appParam)) {
+        if (!LibCommUtils.checkAuthKey(appParam)) {
             //返回错误并返回httcode 403
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "Unauthorized access");
             return;

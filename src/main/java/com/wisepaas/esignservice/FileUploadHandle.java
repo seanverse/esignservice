@@ -9,6 +9,9 @@ import cn.tsign.hz.exception.EsignOPException;
 import com.aliyun.fc.runtime.Context;
 import com.aliyun.fc.runtime.HttpRequestHandler;
 import com.google.gson.JsonObject;
+import com.wisepaas.esignservice.comm.LibCommUtils;
+import com.wisepaas.esignservice.comm.ObjectMapperUtils;
+import com.wisepaas.esignservice.comm.RequestHandlerBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,8 +24,22 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 
-public class FileUpload extends RequestHandlerBase implements HttpRequestHandler {
-    private static final Logger LOGGER = LoggerFactory.getLogger(FileUpload.class);
+public class FileUploadHandle extends RequestHandlerBase implements HttpRequestHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileUploadHandle.class);
+
+    /**
+     * 文件流上传
+     *
+     * @return
+     */
+    public static EsignHttpResponse uploadFile(String uploadUrl, String filePath) throws EsignOPException {
+        //根据文件地址获取文件contentMd5
+        EsignFileBean esignFileBean = new EsignFileBean(filePath);
+        //请求方法
+        EsignRequestType requestType = EsignRequestType.PUT;
+        return EsignHttpHelper.doUploadHttp(uploadUrl, requestType, esignFileBean.getFileBytes(), esignFileBean.getFileContentMD5(),
+                EsignHeaderConstant.CONTENTTYPE_STREAM.VALUE(), true);
+    }
 
     @Override
     public void handleRequest(HttpServletRequest request, HttpServletResponse response, Context context)
@@ -38,7 +55,7 @@ public class FileUpload extends RequestHandlerBase implements HttpRequestHandler
 
         LOGGER.info("fileUrl:{0}, fileName:{1}, localPath:{2}", fileUrl, fileName, filePath);
         //先下载文件并写在当前用户目录中
-        ESignUtils.downloadFile(fileUrl, filePath);
+        LibCommUtils.downloadFile(fileUrl, filePath);
 
         try {
             EsignHttpResponse eResp = this.getUploadUrl(filePath);
@@ -52,7 +69,7 @@ public class FileUpload extends RequestHandlerBase implements HttpRequestHandler
                     fileId, fileName, getUploadUrl));
 
             //文件上传
-            EsignHttpResponse uploadResp = FileUpload.uploadFile(getUploadUrl, filePath);
+            EsignHttpResponse uploadResp = FileUploadHandle.uploadFile(getUploadUrl, filePath);
             JsonObject uploadRespObj = ObjectMapperUtils.fromJson(uploadResp.getBody(), JsonObject.class);
             String uploadCode = uploadRespObj.get("errCode").getAsString();
             System.out.println("文件上传成功，状态码:" + uploadCode);
@@ -98,7 +115,6 @@ public class FileUpload extends RequestHandlerBase implements HttpRequestHandler
         }
     }
 
-
     /**
      * 获取文件上传地址
      *
@@ -123,20 +139,6 @@ public class FileUpload extends RequestHandlerBase implements HttpRequestHandler
                 jsonParm, requestType.name(), apiaddr, true);
         //发起接口请求
         return EsignHttpHelper.doCommHttp(this.appParam.getEsignUrl(), apiaddr, requestType, jsonParm, header, true);
-    }
-
-    /**
-     * 文件流上传
-     *
-     * @return
-     */
-    public static EsignHttpResponse uploadFile(String uploadUrl, String filePath) throws EsignOPException {
-        //根据文件地址获取文件contentMd5
-        EsignFileBean esignFileBean = new EsignFileBean(filePath);
-        //请求方法
-        EsignRequestType requestType = EsignRequestType.PUT;
-        return EsignHttpHelper.doUploadHttp(uploadUrl, requestType, esignFileBean.getFileBytes(), esignFileBean.getFileContentMD5(),
-                EsignHeaderConstant.CONTENTTYPE_STREAM.VALUE(), true);
     }
 
     /**

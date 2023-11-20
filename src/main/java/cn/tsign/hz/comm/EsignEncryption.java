@@ -27,7 +27,6 @@ import java.util.*;
 
 /**
  * @description 请求数据通用处理类
- * 
  * @date 2020年10月22日 下午14:25:31
  * @since JDK1.7
  */
@@ -36,15 +35,17 @@ public class EsignEncryption {
     /**
      * 不允许外部创建实例
      */
-    private EsignEncryption(){}
+    private EsignEncryption() {
+    }
 
     /**
      * 拼接待签名字符串
+     *
      * @param httpMethod
      * @param url
      * @return
      */
-    public static String appendSignDataString(String httpMethod, String contentMd5,String accept,String contentType,String headers,String date, String url) throws EsignOPException {
+    public static String appendSignDataString(String httpMethod, String contentMd5, String accept, String contentType, String headers, String date, String url) throws EsignOPException {
         StringBuffer sb = new StringBuffer();
         sb.append(httpMethod).append("\n").append(accept).append("\n").append(contentMd5).append("\n")
                 .append(contentType).append("\n");
@@ -82,7 +83,7 @@ public class EsignEncryption {
             contentMD5 = Base64.encodeBase64String(md5Bytes);
 
         } catch (NoSuchAlgorithmException e) {
-            EsignOPException ex = new EsignOPException("不支持此算法",e);
+            EsignOPException ex = new EsignOPException("不支持此算法", e);
             ex.initCause(e);
             throw ex;
         } catch (UnsupportedEncodingException e) {
@@ -112,11 +113,11 @@ public class EsignEncryption {
             // 把摘要后的结果digestBytes使用Base64进行编码
             digestBase64 = Base64.encodeBase64String(digestBytes);
         } catch (NoSuchAlgorithmException e) {
-            EsignOPException ex = new EsignOPException("不支持此算法",e);
+            EsignOPException ex = new EsignOPException("不支持此算法", e);
             ex.initCause(e);
             throw ex;
         } catch (InvalidKeyException e) {
-            EsignOPException ex = new EsignOPException("无效的密钥规范",e);
+            EsignOPException ex = new EsignOPException("无效的密钥规范", e);
             ex.initCause(e);
             throw ex;
         } catch (UnsupportedEncodingException e) {
@@ -127,6 +128,7 @@ public class EsignEncryption {
 
     /**
      * 获取时间戳
+     *
      * @return
      */
     public static String timeStamp() {
@@ -136,6 +138,7 @@ public class EsignEncryption {
 
     /**
      * byte字节数组转换成字符串
+     *
      * @param b
      * @return
      */
@@ -153,28 +156,29 @@ public class EsignEncryption {
 
     /**
      * hash散列加密算法
+     *
      * @return
      */
-    public static String Hmac_SHA256(String message,String key) throws EsignOPException {
-        byte[] rawHmac=null;
+    public static String Hmac_SHA256(String message, String key) throws EsignOPException {
+        byte[] rawHmac = null;
         try {
             SecretKeySpec sk = new SecretKeySpec(key.getBytes(), "HmacSHA256");
             Mac mac = Mac.getInstance("HmacSHA256");
             mac.init(sk);
             rawHmac = mac.doFinal(message.getBytes());
-        }catch (InvalidKeyException e){
-            EsignOPException ex = new EsignOPException("无效的密钥规范",e);
+        } catch (InvalidKeyException e) {
+            EsignOPException ex = new EsignOPException("无效的密钥规范", e);
             ex.initCause(e);
             throw ex;
         } catch (NoSuchAlgorithmException e) {
-            EsignOPException ex = new EsignOPException("不支持此算法",e);
+            EsignOPException ex = new EsignOPException("不支持此算法", e);
             ex.initCause(e);
             throw ex;
-        }catch (Exception e){
-            EsignOPException ex = new EsignOPException("hash散列加密算法报错",e);
+        } catch (Exception e) {
+            EsignOPException ex = new EsignOPException("hash散列加密算法报错", e);
             ex.initCause(e);
             throw ex;
-        }finally {
+        } finally {
             return byteArrayToHexString(rawHmac);
         }
 
@@ -184,16 +188,16 @@ public class EsignEncryption {
      * MD5加密32位
      */
     public static String MD5Digest(String text) throws EsignOPException {
-        byte[] digest=null;
+        byte[] digest = null;
         try {
             MessageDigest md5 = MessageDigest.getInstance("MD5");
             md5.update(text.getBytes());
             digest = md5.digest();
-        }catch (NoSuchAlgorithmException e){
-            EsignOPException ex = new EsignOPException("不支持此算法",e);
+        } catch (NoSuchAlgorithmException e) {
+            EsignOPException ex = new EsignOPException("不支持此算法", e);
             ex.initCause(e);
             throw ex;
-        }finally {
+        } finally {
             return byteArrayToHexString(digest);
         }
 
@@ -244,12 +248,12 @@ public class EsignEncryption {
         }
 
         int queryIndex = apiUrl.indexOf("?");
-        String apiUrlPath =apiUrl.substring(0,queryIndex+1);
-        String apiUrlQuery = apiUrl.substring(queryIndex+1);
+        String apiUrlPath = apiUrl.substring(0, queryIndex + 1);
+        String apiUrlQuery = apiUrl.substring(queryIndex + 1);
         //apiUrlQuery为空时返回
-        if(isBlank(apiUrlQuery)){
-            return apiUrl.substring(0,apiUrl.length()-1);
-             }
+        if (isBlank(apiUrlQuery)) {
+            return apiUrl.substring(0, apiUrl.length() - 1);
+        }
         // 请求URL中Query参数转成Map
         Map<Object, Object> queryParamsMap = new HashMap<Object, Object>();
         String[] params = apiUrlQuery.split("&");
@@ -298,7 +302,8 @@ public class EsignEncryption {
     }
 
     /**
-     *获取query
+     * 获取query
+     *
      * @param apiUrl
      * @return
      * @throws EsignOPException
@@ -311,7 +316,7 @@ public class EsignEncryption {
         }
 
         int queryIndex = apiUrl.indexOf("\\?");
-        String apiUrlQuery = apiUrl.substring(queryIndex,apiUrl.length());
+        String apiUrlQuery = apiUrl.substring(queryIndex, apiUrl.length());
 
         // 请求URL中Query参数转成Map
         Map<Object, Object> queryParamsMap = new HashMap<Object, Object>();
@@ -324,17 +329,18 @@ public class EsignEncryption {
                 String msg = MessageFormat.format("请求URL中的Query参数的{0}重复", key);
                 throw new EsignOPException(msg);
             }
-            BasicNameValuePairList.add(new BasicNameValuePair(key,value));
+            BasicNameValuePairList.add(new BasicNameValuePair(key, value));
             queryParamsMap.put(key, value);
         }
         return BasicNameValuePairList;
     }
+
     /**
      *
      */
-    public static boolean callBackCheck(String timestamp,String requestQuery,String body,String key,String signature){
-        String algorithm="HmacSHA256";
-        String encoding="UTF-8";
+    public static boolean callBackCheck(String timestamp, String requestQuery, String body, String key, String signature) {
+        String algorithm = "HmacSHA256";
+        String encoding = "UTF-8";
         Mac mac = null;
         try {
             String data = timestamp + requestQuery + body;

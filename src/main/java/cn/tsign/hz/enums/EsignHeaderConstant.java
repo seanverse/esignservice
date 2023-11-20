@@ -1,14 +1,14 @@
 package cn.tsign.hz.enums;
+
 /**
- * @description  头部信息常量
- * 
- * @date  2020/10/22 15:05
  * @version JDK1.7
+ * @description 头部信息常量
+ * @date 2020/10/22 15:05
  */
 public enum EsignHeaderConstant {
     ACCEPT("*/*"),
     DATE(""),
-    HEADERS( ""),
+    HEADERS(""),
     CONTENTTYPE_FORMDATA("application/x-www-form-urlencoded"),
     CONTENTTYPE_JSON("application/json; charset=UTF-8"),
     CONTENTTYPE_PDF("application/pdf"),
@@ -16,11 +16,12 @@ public enum EsignHeaderConstant {
     AUTHMODE("Signature");
 
     private String value;
+
     private EsignHeaderConstant(String value) {
-        this.value=value;
+        this.value = value;
     }
 
-    public String VALUE(){
+    public String VALUE() {
         return this.value;
     }
 }

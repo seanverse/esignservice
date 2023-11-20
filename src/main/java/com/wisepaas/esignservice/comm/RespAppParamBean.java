@@ -1,4 +1,4 @@
-package com.wisepaas.esignservice;
+package com.wisepaas.esignservice.comm;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -21,8 +21,8 @@ public class RespAppParamBean {
     /**
      * Generates a RespAppParamBean object from the given HttpServletRequest.
      *
-     * @param  request  the HttpServletRequest object to generate the RespAppParamBean from
-     * @return          the generated RespAppParamBean object
+     * @param request the HttpServletRequest object to generate the RespAppParamBean from
+     * @return the generated RespAppParamBean object
      * @throws IllegalArgumentException if the request parameter is null
      */
     public static RespAppParamBean fromReq(HttpServletRequest request) {

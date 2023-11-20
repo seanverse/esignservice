@@ -42,10 +42,10 @@ services:
       function:
         name: fileupload
         description: '文件计算md5并获取esign上传成功获得fileid，filename'
-        environmentVariables: {"TZ":"Asia/Shanghai","app_authorize":"BRFBN0001"}
+        environmentVariables: { "TZ": "Asia/Shanghai","app_authorize": "BRFBN0001" }
         runtime: java11
         codeUri: ./target
-        handler: com.wisepaas.esignservice.FileUpload::handleRequest
+        handler: com.wisepaas.esignservice.FileUploadHandle::handleRequest
         memorySize: 256
         diskSize: 512
         cpu: 0.25
@@ -101,10 +101,10 @@ services:
       function:
         name: usercheck
         description: '测试API调通'
-        environmentVariables: {"TZ":"Asia/Shanghai","app_authorize":"BRFBN0001"}
+        environmentVariables: { "TZ": "Asia/Shanghai","app_authorize": "BRFBN0001" }
         runtime: java11
         codeUri: ./target
-        handler: com.wisepaas.esignservice.UserCheck::handleRequest
+        handler: com.wisepaas.esignservice.UserCheckHandle::handleRequest
         memorySize: 128
         diskSize: 512
         cpu: 0.1
