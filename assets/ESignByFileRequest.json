@@ -1,0 +1,122 @@
+{
+  "docs": [
+    {
+      "fileId": "55607b*******ed565",
+      "fileName": "xx企业劳动合同.pdf"
+    }
+  ],
+  "attachments": [
+    {
+      "fileId": "55607b******5f92ed565",
+      "fileName": "入职材料.pdf"
+    }
+  ],
+  "signFlowConfig": {
+    "signFlowTitle": "企业员工劳动合同签署",
+    "signFlowExpireTime": 1734330195000,
+    "autoStart": true,
+    "autoFinish": false,
+    "identityVerify": true,
+    "notifyUrl": "http://xx.xx.86.172:8081/asyn/notify",
+    "redirectConfig": {
+      "redirectUrl": "http://www.xx.cn/"
+    }
+  },
+  "signers": [
+    {
+      "signConfig": {
+        "forcedReadingTime": "10",
+        "signOrder": 1
+      },
+      "noticeConfig": {
+        "noticeTypes": "1"
+      },
+      "signerType": 0,
+      "psnSignerInfo": {
+        "psnAccount": "153****650",
+        "psnInfo": {
+          "psnName": "张三",
+          "psnIDCardNum": "231******29",
+          "psnIDCardType": "CRED_PSN_CH_IDCARD"
+        }
+      },
+      "signFields": [
+        {
+          "fileId": "5560*******92ed565",
+          "customBizNum": "自定义编码0001",
+          "signFieldType": 0,
+          "normalSignFieldConfig": {
+            "autoSign": false,
+            "freeMode": false,
+            "movableSignField": false,
+            "psnSealStyles": "0,1",
+            "signFieldSize": "96",
+            "signFieldStyle": 1,
+            "signFieldPosition": {
+              "positionPage": "1",
+              "positionX": 100,
+              "positionY": 200
+            }
+          },
+          "signDateConfig": {
+            "dateFormat": "yyyy-MM-dd",
+            "showSignDate": 1,
+            "signDatePositionX": 100,
+            "signDatePositionY": 100
+          }
+        }
+      ]
+    },
+    {
+      "signConfig": {
+        "forcedReadingTime": "10",
+        "signOrder": 2
+      },
+      "noticeConfig": {
+        "noticeTypes": "1,2"
+      },
+      "signerType": 1,
+      "orgSignerInfo": {
+        "orgName": "XXXX企业名字",
+        "orgInfo": {
+          "orgIDCardNum": "911*******3",
+          "orgIDCardType": "CRED_ORG_USCC"
+        },
+        "transactorInfo": {
+          "psnAccount": "139****10",
+          "psnInfo": {
+            "psnName": "李四",
+            "psnIDCardNum": "3311********9",
+            "psnIDCardType": "CRED_PSN_CH_IDCARD"
+          }
+        }
+      },
+      "signFields": [
+        {
+          "fileId": "5560*******92ed565",
+          "customBizNum": "自定义编码0002",
+          "signFieldType": 0,
+          "normalSignFieldConfig": {
+            "autoSign": false,
+            "freeMode": false,
+            "movableSignField": false,
+            "psnSealStyles": "0,1",
+            "signFieldSize": "96",
+            "signFieldStyle": 1,
+            "signFieldPosition": {
+              "positionPage": "1",
+              "positionX": 100,
+              "positionY": 200
+            }
+          },
+          "signDateConfig": {
+            "dateFormat": "yyyy-MM-dd",
+            "showSignDate": 1,
+            "signDatePositionX": 100,
+            "signDatePositionY": 100
+          }
+        }
+      ]
+    }
+  ]
+}

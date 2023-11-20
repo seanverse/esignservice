@@ -1,0 +1,64 @@
+{
+  "docs": [
+    {
+      "fileId": "55607bb*****702b5f92ed565",
+      "fileName": "xx企业劳动合同.pdf"
+    }
+  ],
+  "attachments": [
+    {
+      "fileId": "55607bb*****702b5f92ed565",
+      "fileName": "xx企业劳动合同附件.pdf"
+    }
+  ],
+  "signFlowTitle": "企业员工劳动合同签署",
+  "signFlowExpireTime": 169111118000,
+  "autoFinish": true,
+  "notifyUrl": "http://xxx/asyn/notify",
+  "redirectUrl": "http://www.xx.cn/",
+  "signers": [
+    {
+      "signOrder": 1,
+      "signerType": 0,
+      "noticeTypes": "1",
+      "psnAccount": "15****50",
+      "psnName": "张三",
+      "psnIDCard": "410xxxxx",
+      "orginfo": {
+        "orgCardId": "21545xxxxxxx4bd6b6d9694181668e1c",
+        "orgName": "xx公司"
+      },
+      "signFields": [
+        {
+          "customBizNum": "自定义编码001",
+          "fileId": "55607bb5*******ed565",
+          "signFieldStyle": 1,
+          "positionPage": "1",
+          "positionX": 200,
+          "positionY": 200
+        }
+      ]
+    },
+    {
+      "signOrder": 2,
+      "signerType": 1,
+      "noticeTypes": "1",
+      "psnAccount": "13****50",
+      "psnName": "李四",
+      "orginfo": {
+        "orgCardId": "21545xxxxxxx4bd6b6d9694181668e1c",
+        "orgName": "xx公司"
+      },
+      "signFields": [
+        {
+          "customBizNum": "自定义编码002",
+          "fileId": "67807bb5*******ed565",
+          "signFieldStyle": 1,
+          "positionPage": "1",
+          "positionX": 200,
+          "positionY": 200
+        }
+      ]
+    }
+  ]
+}

@@ -2,18 +2,22 @@ package com.wisepaas.esignservice;
 
 import cn.tsign.hz.comm.EsignHttpHelper;
 import cn.tsign.hz.comm.EsignHttpResponse;
+import cn.tsign.hz.comm.SignFieldPosition;
 import cn.tsign.hz.enums.EsignRequestType;
 import cn.tsign.hz.exception.EsignOPException;
 import com.google.gson.reflect.TypeToken;
-import com.wisepaas.esignservice.comm.ESignResponse;
-import com.wisepaas.esignservice.comm.FileDownloadEntity;
-import com.wisepaas.esignservice.comm.ObjectMapperUtils;
-import com.wisepaas.esignservice.comm.RespAppParamBean;
+import com.wisepaas.esignservice.comm.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 
 public class SignFlowUtils {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SignFlowUtils.class);
+
     /**
      * 催签流程中签署人
      *
@@ -154,6 +158,53 @@ public class SignFlowUtils {
                 requestType, jsonParm, header, true);
         return ObjectMapperUtils.fromJson(resp.getBody(), new TypeToken<FileDownloadEntity>() {
         }.getType());
+    }
 
+    /**
+     * 用关键字查到甲乙方的签章位置
+     *
+     * @param fileId
+     * @return
+     */
+    public static SignFieldPosition[] getPosByKeyword(String fileId, String[] keyword, RespAppParamBean appParam) throws EsignOPException {
+        Objects.requireNonNull(keyword);
+        String apiaddr = "/v3/files/" + fileId + "/keyword-positions";
+        String jsonParm = "{\"keyword\":" + Arrays.toString(keyword) + "}"; // toString会添加[]
+        EsignRequestType requestType = EsignRequestType.POST;
+
+        Map<String, String> header = EsignHttpHelper.signAndBuildSignAndJsonHeader(appParam.getAppID(), appParam.getAppSecret(),
+                jsonParm, requestType.name(), apiaddr, true);
+        EsignHttpResponse resp = EsignHttpHelper.doCommHttp(appParam.getEsignUrl(), apiaddr,
+                requestType, jsonParm, header, true);
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("start getPosByKeyword jsonParm: {0} \n getPosByKeyword resp:{1}", jsonParm, resp.getBody());
+        }
+
+        PositionResponse retResp = ObjectMapperUtils.fromJson(resp.getBody(), PositionResponse.class);
+        PositionResponse.RespData retData = retResp.getData();
+        if (retData != null) {
+            if (retData.getKeywordPositions() != null) {
+                SignFieldPosition[] filedPosList = new SignFieldPosition[keyword.length];
+                //---------------------------------------------------------------------------------
+                // TODO: 第一版position只取最后取到的内容，后续再考虑多个签章区
+                PositionResponse.KeywordPosition item = null;
+                PositionResponse.Position pos = null;
+                PositionResponse.Coordinate coordinate = null;
+                for (int i = 0; i < retData.getKeywordPositions().size(); i++) {
+                    item = retData.getKeywordPositions().get(i);
+                    filedPosList[i] = new SignFieldPosition();
+                    filedPosList[i].setKeyword(keyword[i]);
+                    filedPosList[i].setSearchResult(item.isSearchResult());
+                    pos = item.getPositions().get(item.getPositions().size());
+                    coordinate = pos.getCoordinates().get(pos.getCoordinates().size() - 1);
+                    filedPosList[i].setPositionPage(pos.getPageNum());
+                    filedPosList[i].setPositionX(coordinate.getPositionX());
+                    filedPosList[i].setPositionY(coordinate.getPositionY());
+                }
+                return filedPosList;
+            }
+        }
+        return null;
     }
 }
