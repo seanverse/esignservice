@@ -9,6 +9,7 @@ import cn.tsign.hz.exception.EsignOPException;
 import com.aliyun.fc.runtime.Context;
 import com.aliyun.fc.runtime.HttpRequestHandler;
 import com.google.gson.JsonObject;
+import com.wisepaas.esignservice.comm.ESignResponse;
 import com.wisepaas.esignservice.comm.LibCommUtils;
 import com.wisepaas.esignservice.comm.ObjectMapperUtils;
 import com.wisepaas.esignservice.comm.RequestHandlerBase;
@@ -98,20 +99,15 @@ public class FileUploadHandle extends RequestHandlerBase implements HttpRequestH
             out.close();
         } catch (EsignOPException esignOPException) {
             LOGGER.error("文件上传失败", esignOPException);
-            String body = String.format("{\"code\":\"%s\", \"message\":\"%s\" \n }",
-                    "500", "文件上传失败");
-            OutputStream out = response.getOutputStream();
-            out.write((body).getBytes());
-            out.flush();
-            out.close();
+            ESignResponse<Object> eSignResponse = new ESignResponse<Object>(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    "文件上传失败: " + esignOPException.getMessage(), null);
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, eSignResponse.toJson());
+
         } catch (InterruptedException e) {
             LOGGER.error("文件上传失败", e);
-            String body = String.format("{\"code\":\"%s\", \"message\":\"%s\" \n }",
-                    "500", "文件上传失败");
-            OutputStream out = response.getOutputStream();
-            out.write((body).getBytes());
-            out.flush();
-            out.close();
+            ESignResponse<Object> eSignResponse = new ESignResponse<Object>(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    "文件上传失败: " + e.getMessage(), null);
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, eSignResponse.toJson());
         }
     }
 

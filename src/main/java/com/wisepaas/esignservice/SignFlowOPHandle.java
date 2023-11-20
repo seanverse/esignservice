@@ -25,7 +25,8 @@ public class SignFlowOPHandle extends RequestHandlerBase implements HttpRequestH
         super.handleRequest(request, response, context);//基类方法一定要先执行
         String json = LibCommUtils.getReqBodyJson(request);
         if (json == null) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "401, request missing parameters.");
+            ESignResponse<Object> eSignResponse = new ESignResponse<Object>(500, "401, request missing parameters.", null);
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, eSignResponse.toJson());
             return;
         }
 
@@ -72,7 +73,10 @@ public class SignFlowOPHandle extends RequestHandlerBase implements HttpRequestH
             }
             System.out.println("end: " + reqParam.toString());
         } catch (Exception e) {
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Sign flow throw error: " + e.getMessage());
+            e.printStackTrace();
+            ESignResponse<Object> eSignResponse = new ESignResponse<Object>(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    "Sign flow operate throw error: " + e.getMessage(), null);
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, eSignResponse.toJson());
             return;
         }
     }
