@@ -559,8 +559,8 @@ public class ESignFlowRequest {
     public static class SignDateConfig {
         private String dateFormat;
         private int showSignDate;
-        private int signDatePositionX;
-        private int signDatePositionY;
+        private double signDatePositionX;
+        private double signDatePositionY;
 
         public SignDateConfig() {
         }
@@ -588,52 +588,52 @@ public class ESignFlowRequest {
             this.showSignDate = showSignDate;
         }
 
-        public int getSignDatePositionX() {
+        public double getSignDatePositionX() {
             return signDatePositionX;
         }
 
-        public void setSignDatePositionX(int signDatePositionX) {
+        public void setSignDatePositionX(double signDatePositionX) {
             this.signDatePositionX = signDatePositionX;
         }
 
-        public int getSignDatePositionY() {
+        public double getSignDatePositionY() {
             return signDatePositionY;
         }
 
-        public void setSignDatePositionY(int signDatePositionY) {
+        public void setSignDatePositionY(double signDatePositionY) {
             this.signDatePositionY = signDatePositionY;
         }
     }
 
     public static class SignFieldPosition {
         @SerializedName("positionPage")
-        private String positionPage;
+        private int positionPage;
         @SerializedName("positionX")
-        private int positionX;
+        private double positionX;
         @SerializedName("positionY")
-        private int positionY;
+        private double positionY;
 
-        public String getPositionPage() {
+        public int getPositionPage() {
             return positionPage;
         }
 
-        public void setPositionPage(String positionPage) {
+        public void setPositionPage(int positionPage) {
             this.positionPage = positionPage;
         }
 
-        public int getPositionX() {
+        public double getPositionX() {
             return positionX;
         }
 
-        public void setPositionX(int positionX) {
+        public void setPositionX(double positionX) {
             this.positionX = positionX;
         }
 
-        public int getPositionY() {
+        public double getPositionY() {
             return positionY;
         }
 
-        public void setPositionY(int positionY) {
+        public void setPositionY(double positionY) {
             this.positionY = positionY;
         }
     }

@@ -2,7 +2,7 @@ package com.wisepaas.esignservice;
 
 import cn.tsign.hz.comm.EsignHttpHelper;
 import cn.tsign.hz.comm.EsignHttpResponse;
-import cn.tsign.hz.comm.SignFieldPosition;
+import com.wisepaas.esignservice.comm.SignFieldPosition;
 import cn.tsign.hz.enums.EsignRequestType;
 import cn.tsign.hz.exception.EsignOPException;
 import com.google.gson.reflect.TypeToken;
@@ -11,9 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class SignFlowUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(SignFlowUtils.class);
@@ -162,7 +160,7 @@ public class SignFlowUtils {
 
     /**
      * 用关键字查到甲乙方的签章位置
-     *
+     * create-by-file的多方签章是靠一组signFields来处理
      * @param fileId
      * @return
      */
@@ -179,6 +177,11 @@ public class SignFlowUtils {
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("start getPosByKeyword jsonParm: {0} \n getPosByKeyword resp:{1}", jsonParm, resp.getBody());
+            //            {
+            //                "keywords": [
+            //                "甲方盖章/签字",
+            //                "乙方盖章/签字"  ]
+            //            }
         }
 
         PositionResponse retResp = ObjectMapperUtils.fromJson(resp.getBody(), PositionResponse.class);
@@ -186,21 +189,26 @@ public class SignFlowUtils {
         if (retData != null) {
             if (retData.getKeywordPositions() != null) {
                 SignFieldPosition[] filedPosList = new SignFieldPosition[keyword.length];
-                //---------------------------------------------------------------------------------
-                // TODO: 第一版position只取最后取到的内容，后续再考虑多个签章区
+
                 PositionResponse.KeywordPosition item = null;
                 PositionResponse.Position pos = null;
                 PositionResponse.Coordinate coordinate = null;
+                List<PositionResponse.Position> posList = null;
+                SignFieldPosition.PosPoint retPosPoint =null;
                 for (int i = 0; i < retData.getKeywordPositions().size(); i++) {
                     item = retData.getKeywordPositions().get(i);
                     filedPosList[i] = new SignFieldPosition();
                     filedPosList[i].setKeyword(keyword[i]);
                     filedPosList[i].setSearchResult(item.isSearchResult());
-                    pos = item.getPositions().get(item.getPositions().size());
-                    coordinate = pos.getCoordinates().get(pos.getCoordinates().size() - 1);
-                    filedPosList[i].setPositionPage(pos.getPageNum());
-                    filedPosList[i].setPositionX(coordinate.getPositionX());
-                    filedPosList[i].setPositionY(coordinate.getPositionY());
+                    posList = new ArrayList<PositionResponse.Position>();
+                    for (int j = 0; j < item.getPositions().size(); j++) { //这是支持一个关键词可以在多个页签找到签署处
+                        pos = item.getPositions().get(j);
+                        coordinate = pos.getCoordinates().get(pos.getCoordinates().size() - 1); //TODO:目前只每页最后一个坐标
+                        retPosPoint = new SignFieldPosition.PosPoint();
+                        retPosPoint.setPage(pos.getPageNum());
+                        retPosPoint.setX(coordinate.getPositionX());
+                        retPosPoint.setY(coordinate.getPositionY());
+                    }
                 }
                 return filedPosList;
             }

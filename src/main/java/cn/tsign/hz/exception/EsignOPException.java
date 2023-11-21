@@ -9,7 +9,9 @@ public class EsignOPException extends Exception {
 
     private static final long serialVersionUID = 4359180081622082792L;
     private Exception e;
-
+    public EsignOPException(Throwable cause) {
+        super(cause);
+    }
     public EsignOPException(String msg) {
         super(msg);
     }

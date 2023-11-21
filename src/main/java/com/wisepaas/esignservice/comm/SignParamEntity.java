@@ -195,33 +195,79 @@ public class SignParamEntity {
     public static class SignField {
         private String customBizNum;
         private String fileId;
+        private String keyword;
         private int signFieldStyle;
-        private String positionPage;
-        private int positionX;
-        private int positionY;
+        private int positionPage;
+        private double positionX;
+        private double positionY;
+
+        public SignField() {
+        }
+
+        public SignField(SignField src) {
+            this.customBizNum = src.customBizNum;
+            this.fileId = src.fileId;
+            this.keyword = src.keyword;
+            this.signFieldStyle = src.signFieldStyle;
+            this.positionPage = src.positionPage;
+            this.positionX = src.positionX;
+            this.positionY = src.positionY;
+        }
 
         public String getCustomBizNum() {
             return customBizNum;
+        }
+
+        public void setCustomBizNum(String customBizNum) {
+            this.customBizNum = customBizNum;
         }
 
         public String getFileId() {
             return fileId;
         }
 
+        public void setFileId(String fileId) {
+            this.fileId = fileId;
+        }
+
+        public String getKeyword() {
+            return keyword;
+        }
+
+        public void setKeyword(String keyword) {
+            this.keyword = keyword;
+        }
+
         public int getSignFieldStyle() {
             return signFieldStyle;
         }
 
-        public String getPositionPage() {
+        public void setSignFieldStyle(int signFieldStyle) {
+            this.signFieldStyle = signFieldStyle;
+        }
+
+        public int getPositionPage() {
             return positionPage;
         }
 
-        public int getPositionX() {
+        public void setPositionPage(int positionPage) {
+            this.positionPage = positionPage;
+        }
+
+        public double getPositionX() {
             return positionX;
         }
 
-        public int getPositionY() {
+        public void setPositionX(double positionX) {
+            this.positionX = positionX;
+        }
+
+        public double getPositionY() {
             return positionY;
+        }
+
+        public void setPositionY(double positionY) {
+            this.positionY = positionY;
         }
     }
 }

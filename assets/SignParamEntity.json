@@ -32,6 +32,7 @@
         {
           "customBizNum": "自定义编码001",
           "fileId": "55607bb5*******ed565",
+          "keyword": "甲方签章",
           "signFieldStyle": 1,
           "positionPage": "1",
           "positionX": 200,
@@ -53,6 +54,7 @@
         {
           "customBizNum": "自定义编码002",
           "fileId": "67807bb5*******ed565",
+          "keyword": "乙方签章",
           "signFieldStyle": 1,
           "positionPage": "1",
           "positionX": 200,
