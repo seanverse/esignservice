@@ -22,7 +22,7 @@ public class SignFlowOPHandle extends RequestHandlerBase implements HttpRequestH
     @Override
     public void handleRequest(HttpServletRequest request, HttpServletResponse response, Context context)
             throws IOException, ServletException {
-        super.handleRequest(request, response, context);//基类方法一定要先执行
+        super.handleRequest(request, response, context); //基类方法一定要先执行
         String json = LibCommUtils.getReqBodyJson(request);
         if (json == null) {
             ESignResponse<Object> eSignResponse = new ESignResponse<Object>(500, "401, request missing parameters.", null);

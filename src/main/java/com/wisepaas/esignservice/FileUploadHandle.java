@@ -72,7 +72,7 @@ public class FileUploadHandle extends RequestHandlerBase implements HttpRequestH
             JsonObject eRespObj = ObjectMapperUtils.fromJson(eResp.getBody(), JsonObject.class);
             JsonObject data = eRespObj.getAsJsonObject("data");
             String fileId = data.get("fileId").getAsString();
-            String getUploadUrl = data.get("getUploadUrl").getAsString();
+            String getUploadUrl = data.get("fileUploadUrl").getAsString();
 
             LOGGER.info("获取文件id以及文件上传地址成功: \n fileId:{0}, fileName: {1} \n uploadUrl:{2}}",
                     fileId, fileName, getUploadUrl);

@@ -15,8 +15,8 @@ public class LibCommUtils {
 
     public static boolean checkAuthKey(RespAppParamBean appParam) {
         return appParam.getAuthKey() != null && !appParam.getAuthKey().isEmpty()
-               && System.getenv("app_authorize") != null
-               && System.getenv("app_authorize").equals(appParam.getAuthKey());
+               && System.getenv("AUTHCODE") != null
+               && System.getenv("AUTHCODE").equals(appParam.getAuthKey());
     }
 
     public static void downloadFile(String url, String filePath) throws IOException {

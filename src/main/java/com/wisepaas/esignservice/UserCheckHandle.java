@@ -2,26 +2,21 @@ package com.wisepaas.esignservice;
 
 import com.aliyun.fc.runtime.Context;
 import com.aliyun.fc.runtime.HttpRequestHandler;
-import com.wisepaas.esignservice.comm.LibCommUtils;
-import com.wisepaas.esignservice.comm.RespAppParamBean;
+import com.wisepaas.esignservice.comm.RequestHandlerBase;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 
-public class UserCheckHandle implements HttpRequestHandler {
+public class UserCheckHandle extends RequestHandlerBase implements HttpRequestHandler {
 
     @Override
     public void handleRequest(HttpServletRequest request, HttpServletResponse response, Context context)
             throws IOException, ServletException {
-        RespAppParamBean appParam = RespAppParamBean.fromReq(request);
-        if (!LibCommUtils.checkAuthKey(appParam)) {
-            //返回错误并返回httcode 403
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Unauthorized access");
-            return;
-        }
+        super.handleRequest(request, response, context);
 
         String requestPath = (String) request.getAttribute("FC_REQUEST_PATH");
         String requestURI = (String) request.getAttribute("FC_REQUEST_URI");
@@ -30,12 +25,11 @@ public class UserCheckHandle implements HttpRequestHandler {
         response.setStatus(HttpServletResponse.SC_OK);
         response.setHeader("header1", "value1");
         response.setHeader("header2", "value2");
-        response.setHeader("Content-Type", "text/plain");
+        response.setContentType("text/plain");
 
         String body = String.format("It's OK \n Path: %s\n Uri: %s\n IP: %s\n", requestPath, requestURI, requestClientIP);
-        OutputStream out = response.getOutputStream();
-        out.write((body).getBytes());
-        out.flush();
-        out.close();
+        try (PrintWriter out = response.getWriter()) {
+            out.write(body);
+        }
     }
 }
