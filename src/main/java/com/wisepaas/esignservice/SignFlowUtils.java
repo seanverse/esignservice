@@ -2,7 +2,6 @@ package com.wisepaas.esignservice;
 
 import cn.tsign.hz.comm.EsignHttpHelper;
 import cn.tsign.hz.comm.EsignHttpResponse;
-import com.wisepaas.esignservice.comm.SignFieldPosition;
 import cn.tsign.hz.enums.EsignRequestType;
 import cn.tsign.hz.exception.EsignOPException;
 import com.google.gson.reflect.TypeToken;
@@ -27,22 +26,20 @@ public class SignFlowUtils {
         // noticeTypes: 通知方式（多种方式使用英文逗号分隔）1- 短信，2 - 邮件 ，默认按照流程设置
         //psnAccount:被催签人账号标识（手机号/邮箱）
         //为空表示：催签当前轮到签署但还未签署的所有签署人
-        String jsonParm = """
-                {
-                    "noticeTypes": "%2$d",
-                    "urgedOperator": {
-                        "psnAccount": "%1$s"
-                    }
-                 }
-                """;
+        String jsonParm = "{\n" +
+                          "    \"noticeTypes\": \"%2$d\",\n" +
+                          "    \"urgedOperator\": {\n" +
+                          "        \"psnAccount\": \"%1$s\"\n" +
+                          "    }\n" +
+                          " }\n";
         jsonParm = String.format(jsonParm, psnAccount, 1);
         //请求方法
         EsignRequestType requestType = EsignRequestType.POST;
         //生成签名鉴权方式的的header
         Map<String, String> header = EsignHttpHelper.signAndBuildSignAndJsonHeader(appParam.getAppID(), appParam.getAppSecret(),
-                jsonParm, requestType.name(), apiaddr, true);
+                jsonParm, appParam.getEsignUrl(), requestType.name(), apiaddr);
         //发起接口请求
-        EsignHttpResponse resp = EsignHttpHelper.doCommHttp(appParam.getEsignUrl(), apiaddr, requestType, jsonParm, header, true);
+        EsignHttpResponse resp = EsignHttpHelper.doCommHttp(appParam.getEsignUrl(), apiaddr, requestType, jsonParm, header);
         return ObjectMapperUtils.fromJson(resp.getBody(), new TypeToken<ESignResponse<Object>>() {
         }.getType());
     }
@@ -60,10 +57,10 @@ public class SignFlowUtils {
         EsignRequestType requestType = EsignRequestType.POST;
         //生成签名鉴权方式的的header
         Map<String, String> header = EsignHttpHelper.signAndBuildSignAndJsonHeader(appParam.getAppID(), appParam.getAppSecret(),
-                jsonParm, requestType.name(), apiaddr, true);
+                jsonParm, requestType.name(), appParam.getEsignUrl(), apiaddr);
 
         //发起接口请求
-        EsignHttpResponse resp = EsignHttpHelper.doCommHttp(appParam.getEsignUrl(), apiaddr, requestType, jsonParm, header, true);
+        EsignHttpResponse resp = EsignHttpHelper.doCommHttp(appParam.getEsignUrl(), apiaddr, requestType, jsonParm, header);
         return ObjectMapperUtils.fromJson(resp.getBody(), new TypeToken<ESignResponse<Object>>() {
         }.getType());
     }
@@ -81,10 +78,10 @@ public class SignFlowUtils {
         EsignRequestType requestType = EsignRequestType.POST;
         //生成签名鉴权方式的的header
         Map<String, String> header = EsignHttpHelper.signAndBuildSignAndJsonHeader(appParam.getAppID(), appParam.getAppSecret(),
-                jsonParm, requestType.name(), apiaddr, true);
+                jsonParm, requestType.name(), appParam.getEsignUrl(), apiaddr);
 
         //发起接口请求
-        EsignHttpResponse resp = EsignHttpHelper.doCommHttp(appParam.getEsignUrl(), apiaddr, requestType, jsonParm, header, true);
+        EsignHttpResponse resp = EsignHttpHelper.doCommHttp(appParam.getEsignUrl(), apiaddr, requestType, jsonParm, header);
         return ObjectMapperUtils.fromJson(resp.getBody(), new TypeToken<ESignResponse<Object>>() {
         }.getType());
     }
@@ -103,9 +100,9 @@ public class SignFlowUtils {
         EsignRequestType requestType = EsignRequestType.POST;
         //生成签名鉴权方式的的header
         Map<String, String> header = EsignHttpHelper.signAndBuildSignAndJsonHeader(appParam.getAppID(), appParam.getAppSecret(),
-                jsonParm, requestType.name(), apiaddr, true);
+                jsonParm, requestType.name(), appParam.getEsignUrl(), apiaddr);
         //发起接口请求
-        EsignHttpResponse resp = EsignHttpHelper.doCommHttp(appParam.getEsignUrl(), apiaddr, requestType, jsonParm, header, true);
+        EsignHttpResponse resp = EsignHttpHelper.doCommHttp(appParam.getEsignUrl(), apiaddr, requestType, jsonParm, header);
         return ObjectMapperUtils.fromJson(resp.getBody(), new TypeToken<ESignResponse<Object>>() {
         }.getType());
     }
@@ -124,10 +121,10 @@ public class SignFlowUtils {
         EsignRequestType requestType = EsignRequestType.POST;
         //生成签名鉴权方式的的header
         Map<String, String> header = EsignHttpHelper.signAndBuildSignAndJsonHeader(appParam.getAppID(), appParam.getAppSecret(),
-                jsonParm, requestType.name(), apiaddr, true);
+                jsonParm, requestType.name(), appParam.getEsignUrl(), apiaddr);
 
         //发起接口请求
-        EsignHttpResponse resp = EsignHttpHelper.doCommHttp(appParam.getEsignUrl(), apiaddr, requestType, jsonParm, header, true);
+        EsignHttpResponse resp = EsignHttpHelper.doCommHttp(appParam.getEsignUrl(), apiaddr, requestType, jsonParm, header);
         return ObjectMapperUtils.fromJson(resp.getBody(), new TypeToken<ESignResponse<Object>>() {
         }.getType());
     }
@@ -148,12 +145,10 @@ public class SignFlowUtils {
                 appParam.getAppID(),
                 appParam.getAppSecret(),
                 jsonParm,
-                requestType.name(),
-                apiaddr,
-                true
-        );
+                requestType.name(), appParam.getEsignUrl(),
+                apiaddr);
         EsignHttpResponse resp = EsignHttpHelper.doCommHttp(appParam.getEsignUrl(), apiaddr,
-                requestType, jsonParm, header, true);
+                requestType, jsonParm, header);
         return ObjectMapperUtils.fromJson(resp.getBody(), new TypeToken<FileDownloadEntity>() {
         }.getType());
     }
@@ -161,6 +156,7 @@ public class SignFlowUtils {
     /**
      * 用关键字查到甲乙方的签章位置
      * create-by-file的多方签章是靠一组signFields来处理
+     *
      * @param fileId
      * @return
      */
@@ -171,9 +167,9 @@ public class SignFlowUtils {
         EsignRequestType requestType = EsignRequestType.POST;
 
         Map<String, String> header = EsignHttpHelper.signAndBuildSignAndJsonHeader(appParam.getAppID(), appParam.getAppSecret(),
-                jsonParm, requestType.name(), apiaddr, true);
+                jsonParm, requestType.name(), appParam.getEsignUrl(), apiaddr);
         EsignHttpResponse resp = EsignHttpHelper.doCommHttp(appParam.getEsignUrl(), apiaddr,
-                requestType, jsonParm, header, true);
+                requestType, jsonParm, header);
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("start getPosByKeyword jsonParm: {0} \n getPosByKeyword resp:{1}", jsonParm, resp.getBody());
@@ -194,7 +190,7 @@ public class SignFlowUtils {
                 PositionResponse.Position pos = null;
                 PositionResponse.Coordinate coordinate = null;
                 List<PositionResponse.Position> posList = null;
-                SignFieldPosition.PosPoint retPosPoint =null;
+                SignFieldPosition.PosPoint retPosPoint = null;
                 for (int i = 0; i < retData.getKeywordPositions().size(); i++) {
                     item = retData.getKeywordPositions().get(i);
                     filedPosList[i] = new SignFieldPosition();

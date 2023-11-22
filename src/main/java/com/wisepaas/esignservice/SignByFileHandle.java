@@ -31,7 +31,7 @@ public class SignByFileHandle extends RequestHandlerBase implements HttpRequestH
 
         String json = LibCommUtils.getReqBodyJson(request);
         if (json == null) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "401, request missing parameters.");
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "400, request missing parameters.");
             return;
         }
 
@@ -44,9 +44,9 @@ public class SignByFileHandle extends RequestHandlerBase implements HttpRequestH
         String jsonParam = ObjectMapperUtils.toJson(reqData);
         try {
             Map<String, String> header = EsignHttpHelper.signAndBuildSignAndJsonHeader(appParam.getAppID(), appParam.getAppSecret(),
-                    jsonParam, requestType.name(), apiaddr, true);
+                    jsonParam, requestType.name(), appParam.getEsignUrl(), apiaddr);
             EsignHttpResponse resp = EsignHttpHelper.doCommHttp(appParam.getEsignUrl(), apiaddr,
-                    requestType, jsonParam, header, true);
+                    requestType, jsonParam, header);
 
             /*if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("start create-by-file jsonParm: {0} \n resp:{1}", jsonParam, resp.getBody());

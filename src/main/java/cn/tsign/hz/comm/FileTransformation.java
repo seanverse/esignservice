@@ -56,10 +56,6 @@ public class FileTransformation {
         return base64;
     }
 
-    public static void main(String[] args) throws EsignOPException {
-        System.out.println(getFileContentMD5("D:\\文档\\PLT2022-02124CT.pdf"));
-    }
-
     /***
      * 计算文件内容的Content-MD5
      * @param filePath 文件路径

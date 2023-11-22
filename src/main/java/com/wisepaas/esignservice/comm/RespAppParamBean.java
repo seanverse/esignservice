@@ -35,6 +35,15 @@ public class RespAppParamBean {
         String esignUrl = request.getHeader("esignUrl");
         String authKey = request.getHeader("authKey");
 
+        if (appID == null || appSecret == null || esignUrl == null || authKey == null) {
+            throw new IllegalArgumentException("Request Header don't have spacify param, RespAppParam method's param cannot be null.");
+        }
+
+        if (!esignUrl.matches("^https://.*") && !esignUrl.startsWith("http")) {
+            // 添加https://前缀
+            esignUrl = "https://" + esignUrl;
+        }
+
         return new RespAppParamBean(appID, appSecret, esignUrl, authKey);
     }
 

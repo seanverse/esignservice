@@ -39,15 +39,23 @@ public class FileUploadHandle extends RequestHandlerBase implements HttpRequestH
         //请求方法
         EsignRequestType requestType = EsignRequestType.PUT;
         return EsignHttpHelper.doUploadHttp(uploadUrl, requestType, esignFileBean.getFileBytes(), esignFileBean.getFileContentMD5(),
-                EsignHeaderConstant.CONTENTTYPE_STREAM.VALUE(), true);
+                EsignHeaderConstant.CONTENTTYPE_STREAM.VALUE());
     }
 
     @Override
     public void handleRequest(HttpServletRequest request, HttpServletResponse response, Context context)
             throws IOException, ServletException {
         super.handleRequest(request, response, context);//基类方法一定要先执行
-        String fileUrl = request.getHeader("fileurl");
-        String fileName = request.getHeader("filename");
+
+        String json = LibCommUtils.getReqBodyJson(request);
+        if (json == null) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "400, request missing parameters.");
+            return;
+        }
+        JsonObject reqObj = ObjectMapperUtils.fromJson(json, JsonObject.class);
+
+        String fileUrl = reqObj.get("fileurl").getAsString();
+        String fileName = reqObj.get("filename").getAsString();
 
         // 获取当前工作目录
         String currentDirectory = System.getProperty("user.dir");
@@ -66,14 +74,14 @@ public class FileUploadHandle extends RequestHandlerBase implements HttpRequestH
             String fileId = data.get("fileId").getAsString();
             String getUploadUrl = data.get("getUploadUrl").getAsString();
 
-            System.out.println(String.format("获取文件id以及文件上传地址成功: \n 文件id:%s, 文件名称: %s \n 上传链接:%s",
-                    fileId, fileName, getUploadUrl));
+            LOGGER.info("获取文件id以及文件上传地址成功: \n fileId:{0}, fileName: {1} \n uploadUrl:{2}}",
+                    fileId, fileName, getUploadUrl);
 
             //文件上传
             EsignHttpResponse uploadResp = FileUploadHandle.uploadFile(getUploadUrl, filePath);
             JsonObject uploadRespObj = ObjectMapperUtils.fromJson(uploadResp.getBody(), JsonObject.class);
             String uploadCode = uploadRespObj.get("errCode").getAsString();
-            System.out.println("文件上传成功，状态码:" + uploadCode);
+            LOGGER.info("文件上传成功，状态码:" + uploadCode);
 
             //文件上传成功后文件会有一个异步处理过程，建议轮询文件状态，正常后发起签署
             //查询文件上传状态
@@ -82,12 +90,12 @@ public class FileUploadHandle extends RequestHandlerBase implements HttpRequestH
                 EsignHttpResponse fileStatus = getFileStatus(fileId);
                 JsonObject fileStatusJsonObject = ObjectMapperUtils.fromJson(fileStatus.getBody(), JsonObject.class);
                 String status = fileStatusJsonObject.getAsJsonObject("data").get("fileStatus").getAsString();
-                System.out.println(String.format("查询文件状态执行第%s次", i + 1));
+                LOGGER.info(String.format("查询文件状态执行第%s次", i + 1));
                 if ("2".equalsIgnoreCase(status) || "5".equalsIgnoreCase(status)) {//查询状态为2或者5代表文件准备完成
-                    System.out.println(String.format("文件[%s]准备完成，状态码:%s (查询状态为2或者5代表文件准备完成)", fileId, status));
+                    LOGGER.info(String.format("文件[%s]准备完成，状态码:%s (查询状态为2或者5代表文件准备完成)", fileId, status));
                     break;
                 }
-                System.out.println("文件未准备完成,等待两秒重新查询");
+                LOGGER.info("文件未准备完成,等待两秒重新查询");
                 TimeUnit.SECONDS.sleep(2);
                 i++;
             }
@@ -121,20 +129,22 @@ public class FileUploadHandle extends RequestHandlerBase implements HttpRequestH
         EsignFileBean esignFileBean = new EsignFileBean(filePath);
         String apiaddr = "/v3/files/file-upload-url";
         //请求参数body体,json格式。get或者delete请求时jsonString传空json:"{}"或者null
+        //convertToPDF: 是否需要转换成PDF文档，默认值 false。true - 需要转换成PDF
+        String pdfV = esignFileBean.isPDF() ? " false" : "true";
         String jsonParm = "{\n" +
-                "    \"contentMd5\": \"" + esignFileBean.getFileContentMD5() + "\",\n" +
-                "    \"fileName\":\"" + esignFileBean.getFileName() + "\"," +
-                "    \"fileSize\": " + esignFileBean.getFileSize() + ",\n" +
-                "    \"convertToPDF\": false,\n" +
-                "    \"contentType\": \"" + EsignHeaderConstant.CONTENTTYPE_STREAM.VALUE() + "\"\n" +
-                "}";
+                          "    \"contentMd5\": \"" + esignFileBean.getFileContentMD5() + "\",\n" +
+                          "    \"fileName\":\"" + esignFileBean.getFileName() + "\"," +
+                          "    \"fileSize\": " + esignFileBean.getFileSize() + ",\n" +
+                          "    \"convertToPDF\": " + pdfV + ",\n" +
+                          "    \"contentType\": \"" + EsignHeaderConstant.CONTENTTYPE_STREAM.VALUE() + "\"\n" +
+                          "}";
         //请求方法
         EsignRequestType requestType = EsignRequestType.POST;
         //生成签名鉴权方式的的header
         Map<String, String> header = EsignHttpHelper.signAndBuildSignAndJsonHeader(this.appParam.getAppID(), this.appParam.getAppSecret(),
-                jsonParm, requestType.name(), apiaddr, true);
+                jsonParm, requestType.name(), appParam.getEsignUrl(), apiaddr);
         //发起接口请求
-        return EsignHttpHelper.doCommHttp(this.appParam.getEsignUrl(), apiaddr, requestType, jsonParm, header, true);
+        return EsignHttpHelper.doCommHttp(this.appParam.getEsignUrl(), apiaddr, requestType, jsonParm, header);
     }
 
     /**
@@ -148,10 +158,14 @@ public class FileUploadHandle extends RequestHandlerBase implements HttpRequestH
         //请求方法
         EsignRequestType requestType = EsignRequestType.GET;
         //生成签名鉴权方式的的header
-        Map<String, String> header = EsignHttpHelper.signAndBuildSignAndJsonHeader(this.appParam.getAppID(), this.appParam.getAppSecret(),
-                jsonParm, requestType.name(), apiaddr, true);
+        Map<String, String> header = EsignHttpHelper.signAndBuildSignAndJsonHeader(this.appParam.getAppID(),
+                this.appParam.getAppSecret(),
+                jsonParm,
+                requestType.name(),
+                appParam.getEsignUrl(),
+                apiaddr);
         //发起接口请求
-        return EsignHttpHelper.doCommHttp(this.appParam.getEsignUrl(), apiaddr, requestType, jsonParm, header, true);
+        return EsignHttpHelper.doCommHttp(this.appParam.getEsignUrl(), apiaddr, requestType, jsonParm, header);
     }
 
 }

@@ -15,8 +15,8 @@ public class LibCommUtils {
 
     public static boolean checkAuthKey(RespAppParamBean appParam) {
         return appParam.getAuthKey() != null && !appParam.getAuthKey().isEmpty()
-                && System.getenv("app_authorize") != null
-                && System.getenv("app_authorize").equals(appParam.getAuthKey());
+               && System.getenv("app_authorize") != null
+               && System.getenv("app_authorize").equals(appParam.getAuthKey());
     }
 
     public static void downloadFile(String url, String filePath) throws IOException {
@@ -53,5 +53,32 @@ public class LibCommUtils {
 
         return requestBody.toString();
     }
+
+    /*
+       通过文件名简单判断是否为PDF
+     */
+    public static boolean isPDFByName(String fileName) {
+        return fileName.endsWith(".pdf");
+    }
+
+    /*
+       通过文件内容数据的magicNumber来判断PDF，更精准。
+     */
+    public static boolean isPDFByData(String fileName) {
+        try (FileInputStream fis = new FileInputStream(fileName)) {
+            byte[] magicNumber = new byte[4];
+            fis.read(magicNumber);
+            String magicString = new String(magicNumber);
+            if (magicString.equals("%PDF")) {
+                return true;
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+
 }
 

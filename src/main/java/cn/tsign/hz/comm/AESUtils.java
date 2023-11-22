@@ -83,16 +83,4 @@ public class AESUtils {
         }
         return null;
     }
-
-    public static void main(String[] args) {
-        // 待加密的字符串
-        String s = "{\"name\":\"张三\",\"idNo\":\"320333xxxxxxx12522\"}";
-        // 秘钥
-        String pass = "D/RA+2esbSbfSVOQsTGlpg==";
-        // 加密
-        String encoded = encrypt(s, pass);
-        System.out.println("加密之前：" + s);
-        System.out.println("加密结果：" + encoded);
-        System.out.println("解密结果：" + decrypt(encoded, pass));
-    }
 }

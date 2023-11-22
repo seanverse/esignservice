@@ -18,6 +18,8 @@ public class EsignFileBean {
     private String fileContentMD5;
     //文件地址
     private String filePath;
+    // pdf文件
+    private boolean isPDF;
 
 
     public EsignFileBean(String filePath) throws EsignOPException {
@@ -29,7 +31,13 @@ public class EsignFileBean {
         }
         this.fileName = file.getName();
         this.fileSize = (int) file.length();
+        this.isPDF = EsignFileBean.isPDFByName(fileName);
     }
+
+    public static boolean isPDFByName(String fileName) {
+        return fileName.endsWith(".pdf");
+    }
+
 
     public String getFileName() {
         return fileName;
@@ -41,6 +49,10 @@ public class EsignFileBean {
 
     public String getFileContentMD5() {
         return fileContentMD5;
+    }
+
+    public boolean isPDF() {
+        return isPDF;
     }
 
     /**

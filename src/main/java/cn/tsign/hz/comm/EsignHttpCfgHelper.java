@@ -211,7 +211,7 @@ public class EsignHttpCfgHelper {
         PROXY_PASSWORD = proxyPassword;
     }
 
-    //------------------------------公有方法start--------------------------------------------
+
 
     /**
      * @param reqType {@link EsignRequestType} 请求类型  GET、 POST 、 DELETE 、 PUT
@@ -222,7 +222,7 @@ public class EsignHttpCfgHelper {
      * @throws EsignOPException
      * @description 发起HTTP / HTTPS 请求
      */
-    public static EsignHttpResponse sendHttp(EsignRequestType reqType, String httpUrl, Map<String, String> headers, Object param, boolean debug)
+    public static EsignHttpResponse sendHttp(EsignRequestType reqType, String httpUrl, Map<String, String> headers, Object param)
             throws EsignOPException {
         HttpRequestBase reqBase = null;
         if (httpUrl.startsWith("http")) {
@@ -230,10 +230,10 @@ public class EsignHttpCfgHelper {
         } else {
             throw new EsignOPException("请求url地址格式错误");
         }
-        if (debug) {
-            LOGGER.info("请求头:{}", headers + "\n");
-            LOGGER.info("请求参数\n{}", param + "\n");
-            LOGGER.info("请求地址\n:{}\n请求方式\n:{}", reqBase.getURI(), reqType + "\n");
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("请求头:{} \n", headers);
+            LOGGER.debug("请求参数: {} \n", param);
+            LOGGER.debug("请求地址:{} \n请求方式:{} \n", reqBase.getURI(), reqType);
         }
         //请求方法不是GET或者DELETE时传入body体，否则不传入。
         String[] methods = {"DELETE", "GET"};
@@ -260,6 +260,8 @@ public class EsignHttpCfgHelper {
                 reqBase.setHeader(entry.getKey(), entry.getValue());
             }
         }
+
+
         //响应对象
         CloseableHttpResponse res = null;
         //响应内容
@@ -276,9 +278,9 @@ public class EsignHttpCfgHelper {
             if (httpEntity != null) {
                 resCtx = EntityUtils.toString(httpEntity, "utf-8");
             }
-            if (debug) {
-                LOGGER.info("响应\n{}", resCtx + "\n");
-                LOGGER.info("----------------------------end------------------------");
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("response retrun:\n{}", resCtx);
+                LOGGER.debug("----------------------------end------------------------");
             }
         } catch (NoHttpResponseException e) {
             throw new EsignOPException("服务器丢失了", e);
@@ -321,9 +323,7 @@ public class EsignHttpCfgHelper {
         esignHttpResponse.setBody(resCtx);
         return esignHttpResponse;
     }
-    //------------------------------公有方法end----------------------------------------------
 
-    //------------------------------私有方法start--------------------------------------------
 
     /**
      * @param httpReqBase

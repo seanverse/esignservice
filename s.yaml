@@ -54,7 +54,7 @@ services:
         # initializationTimeout: 60
         # initializer: example.App::initialize
       triggers:
-        - name: httpTrigger1
+        - name: httpTrigger_fileupload
           type: http
           config:
             authType: anonymous
@@ -62,6 +62,7 @@ services:
             disableURLInternet: false
             methods:
               - GET
+              - POST
       customDomains:
         - domainName: auto
           protocol: HTTP
@@ -110,15 +111,16 @@ services:
             disableURLInternet: false
             methods:
               - GET
+              - POST
       customDomains:
         - domainName: auto
           protocol: HTTP
           routeConfigs:
-            - path: /usercheck
+            - path: /*
               methods:
                 - GET
                 - POST
-  SignFlowOPHandle: # 业务名称/模块名称
+  func_flowop: # 业务名称/模块名称
     component: fc # 组件名称
     internetAccess: true
     logConfig:
@@ -163,7 +165,7 @@ services:
               methods:
                 - GET
                 - POST
-  SignByFlowHandle: # 业务名称/模块名称
+  func_signfile: # 业务名称/模块名称
     component: fc # 组件名称
     internetAccess: true
     logConfig:
@@ -180,7 +182,7 @@ services:
       region: ${vars.region} # 关于变量的使用方法，可以参考：https://www.serverless-devs.com/serverless-devs/yaml#变量赋值
       service: ${vars.service}
       function:
-        name: flowop
+        name: signfile
         description: '用文件来发起签署'
         environmentVariables: { "TZ": "Asia/Shanghai","app_authorize": "BRFBN0001" }
         runtime: java11
@@ -192,14 +194,14 @@ services:
         instanceConcurrency: 10
         timeout: 60
       triggers:
-        - name: httpTrigger_createflow
+        - name: httpTrigger_signfile
           type: http
           config:
             authType: anonymous
             # authType: function
             disableURLInternet: false
             methods:
-              - GET
+              - POST
       customDomains:
         - domainName: auto
           protocol: HTTP

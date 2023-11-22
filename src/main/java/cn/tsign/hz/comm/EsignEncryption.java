@@ -14,6 +14,8 @@ package cn.tsign.hz.comm;
 import cn.tsign.hz.exception.EsignOPException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.message.BasicNameValuePair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -31,6 +33,7 @@ import java.util.*;
  * @since JDK1.7
  */
 public class EsignEncryption {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EsignEncryption.class);
 
     /**
      * 不允许外部创建实例
@@ -349,8 +352,7 @@ public class EsignEncryption {
             mac.init(secretKey);
             mac.update(data.getBytes(encoding));
         } catch (NoSuchAlgorithmException | InvalidKeyException | UnsupportedEncodingException e) {
-            e.printStackTrace();
-            System.out.println("获取Signature签名信息异常：" + e.getMessage());
+            LOGGER.error("获取Signature签名信息异常", e);
             return false;
         }
         return byte2hex(mac.doFinal()).equalsIgnoreCase(signature);

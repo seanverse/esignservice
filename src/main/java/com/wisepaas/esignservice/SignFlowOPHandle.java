@@ -31,7 +31,7 @@ public class SignFlowOPHandle extends RequestHandlerBase implements HttpRequestH
         }
 
         ReqParamBean reqParam = ObjectMapperUtils.fromJson(json, ReqParamBean.class);
-        System.out.println("start: " + reqParam.toString());
+        LOGGER.info("start: " + reqParam.toString());
 
         String body = "";
         try {
@@ -71,9 +71,9 @@ public class SignFlowOPHandle extends RequestHandlerBase implements HttpRequestH
                 out.write((body).getBytes());
                 out.flush();
             }
-            System.out.println("end: " + reqParam.toString());
+            LOGGER.info("end: {0}", body);
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("error: ", e);
             ESignResponse<Object> eSignResponse = new ESignResponse<Object>(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     "Sign flow operate throw error: " + e.getMessage(), null);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, eSignResponse.toJson());
@@ -103,7 +103,7 @@ public class SignFlowOPHandle extends RequestHandlerBase implements HttpRequestH
             }
             ReqParamBean other = (ReqParamBean) obj;
             return Objects.equals(this.signFlowId, other.signFlowId) &&
-                    Objects.equals(this.cmd, other.cmd) && Objects.equals(this.cmdParam, other.cmdParam);
+                   Objects.equals(this.cmd, other.cmd) && Objects.equals(this.cmdParam, other.cmdParam);
         }
 
         @Override
