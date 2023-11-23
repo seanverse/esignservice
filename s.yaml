@@ -10,7 +10,9 @@ vars: # 全局变量
   service:
     name: esignservice
     description: 'esign service faas'
-
+    logConfig: { "project": "aliyun-fc-cn-hangzhou-ad6c5d74-02d1-5afc-9075-ef95f91a2327","logstore": "function-log","enableRequestMetrics": true,"enableInstanceMetrics": true,"logBeginRule": "DefaultRegex" }
+    role: "acs:ram::1852384507877180:role/aliyunfcdefaultrole"
+    useSLRAuthentication: false
 services:
   func_fileupload: # 业务名称/模块名称
     # 如果只想针对 esignservice 下面的业务进行相关操作，可以在命令行中加上 esignservice，例如：
@@ -18,12 +20,6 @@ services:
     # 如果不带有 esignservice ，而是直接执行 s build，工具则会对当前Yaml下，所有和 esignservice 平级的业务模块（如有其他平级的模块，例如下面注释的next-function），按照一定顺序进行 build 操作
     component: fc # 组件名称，Serverless Devs 工具本身类似于一种游戏机，不具备具体的业务能力，组件类似于游戏卡，用户通过向游戏机中插入不同的游戏卡实现不同的功能，即通过使用不同的组件实现不同的具体业务能力
     internetAccess: true
-    logConfig:
-      enableRequestMetrics: true
-      enableInstanceMetrics: true
-      logBeginRule: DefaultRegex
-      project: aliyun-fc-cn-hangzhou-ad6c5d74-02d1-5afc-9075-ef95f91a2327
-      logstore: function-log
     actions: # 自定义执行逻辑，关于actions 的使用，可以参考：https://www.serverless-devs.com/serverless-devs/yaml#行为描述
       pre-deploy: # 在deploy之前运行
         - run: mvn package
@@ -42,7 +38,7 @@ services:
       function:
         name: fileupload
         description: '文件计算md5并获取esign上传成功获得fileid，filename'
-        environmentVariables: {"TZ": "Asia/Shanghai", "AUTHCODE": "BRFBN0001", "LOGLEVEL": "ALL" }
+        environmentVariables: { "TZ": "Asia/Shanghai", "AUTHCODE": "BRFBN0001", "LOGLEVEL": "ALL" }
         runtime: java11
         codeUri: ./target
         handler: com.wisepaas.esignservice.FileUploadHandle::handleRequest
@@ -75,12 +71,6 @@ services:
   func_usercheck: # 业务名称/模块名称
     component: fc # 组件名称
     internetAccess: true
-    logConfig:
-      enableRequestMetrics: true
-      enableInstanceMetrics: true
-      logBeginRule: DefaultRegex
-      project: aliyun-fc-cn-hangzhou-ad6c5d74-02d1-5afc-9075-ef95f91a2327
-      logstore: function-log
     actions: # 自定义执行逻辑，关于actions 的使用，可以参考：https://www.serverless-devs.com/serverless-devs/yaml#行为描述
       pre-deploy: # 在deploy之前运行
         - run: mvn package
@@ -91,7 +81,7 @@ services:
       function:
         name: usercheck
         description: '测试API调通'
-        environmentVariables: {"TZ": "Asia/Shanghai", "AUTHCODE": "BRFBN0001", "LOGLEVEL": "ALL" }
+        environmentVariables: { "TZ": "Asia/Shanghai", "AUTHCODE": "BRFBN0001", "LOGLEVEL": "ALL" }
         runtime: java11
         codeUri: ./target
         handler: com.wisepaas.esignservice.UserCheckHandle::handleRequest
@@ -123,12 +113,6 @@ services:
   func_flowop: # 业务名称/模块名称
     component: fc # 组件名称
     internetAccess: true
-    logConfig:
-      enableRequestMetrics: true
-      enableInstanceMetrics: true
-      logBeginRule: DefaultRegex
-      project: aliyun-fc-cn-hangzhou-ad6c5d74-02d1-5afc-9075-ef95f91a2327
-      logstore: function-log
     actions: # 自定义执行逻辑，关于actions 的使用，可以参考：https://www.serverless-devs.com/serverless-devs/yaml#行为描述
       pre-deploy: # 在deploy之前运行
         - run: mvn package
@@ -139,7 +123,7 @@ services:
       function:
         name: flowop
         description: '已生成signFlow的常用操作项'
-        environmentVariables: {"TZ": "Asia/Shanghai", "AUTHCODE": "BRFBN0001", "LOGLEVEL": "ALL" }
+        environmentVariables: { "TZ": "Asia/Shanghai", "AUTHCODE": "BRFBN0001", "LOGLEVEL": "ALL" }
         runtime: java11
         codeUri: ./target
         handler: com.wisepaas.esignservice.SignFlowOPHandle::handleRequest
@@ -168,12 +152,6 @@ services:
   func_signfile: # 业务名称/模块名称
     component: fc # 组件名称
     internetAccess: true
-    logConfig:
-      enableRequestMetrics: true
-      enableInstanceMetrics: true
-      logBeginRule: DefaultRegex
-      project: aliyun-fc-cn-hangzhou-ad6c5d74-02d1-5afc-9075-ef95f91a2327
-      logstore: function-log
     actions: # 自定义执行逻辑，关于actions 的使用，可以参考：https://www.serverless-devs.com/serverless-devs/yaml#行为描述
       pre-deploy: # 在deploy之前运行
         - run: mvn package
@@ -184,10 +162,10 @@ services:
       function:
         name: signfile
         description: '用文件来发起签署'
-        environmentVariables: {"TZ": "Asia/Shanghai", "AUTHCODE": "BRFBN0001", "LOGLEVEL": "ALL" }
+        environmentVariables: { "TZ": "Asia/Shanghai", "AUTHCODE": "BRFBN0001", "LOGLEVEL": "ALL" }
         runtime: java11
         codeUri: ./target
-        handler: com.wisepaas.esignservice.SignByFlowHandle::handleRequest
+        handler: com.wisepaas.esignservice.SignByFileHandle::handleRequest
         memorySize: 128
         diskSize: 512
         cpu: 0.1

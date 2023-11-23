@@ -1,6 +1,7 @@
 package com.wisepaas.esignservice.comm;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Objects;
 
 /**
  * 取得访问esign的核心参数
@@ -11,11 +12,14 @@ public class RespAppParamBean {
     private String esignUrl;
     private String authKey;
 
-    public RespAppParamBean(String appID, String appSecret, String esignUrl, String authKey) {
+    private boolean isDevStruct;
+
+    public RespAppParamBean(String appID, String appSecret, String esignUrl, String authKey, boolean isDevStruct) {
         this.appID = appID;
         this.appSecret = appSecret;
         this.esignUrl = esignUrl;
         this.authKey = authKey;
+        this.isDevStruct = isDevStruct;
     }
 
     /**
@@ -34,9 +38,15 @@ public class RespAppParamBean {
         String appSecret = request.getHeader("appSecret");
         String esignUrl = request.getHeader("esignUrl");
         String authKey = request.getHeader("authKey");
+        String devTag = request.getHeader("structTag");
 
         if (appID == null || appSecret == null || esignUrl == null || authKey == null) {
             throw new IllegalArgumentException("Request Header don't have spacify param, RespAppParam method's param cannot be null.");
+        }
+
+        boolean isDevStruct = false;
+        if (Objects.nonNull(devTag)) {
+            isDevStruct = devTag.compareToIgnoreCase("true") == 0;
         }
 
         if (!esignUrl.matches("^https://.*") && !esignUrl.startsWith("http")) {
@@ -44,7 +54,7 @@ public class RespAppParamBean {
             esignUrl = "https://" + esignUrl;
         }
 
-        return new RespAppParamBean(appID, appSecret, esignUrl, authKey);
+        return new RespAppParamBean(appID, appSecret, esignUrl, authKey, isDevStruct);
     }
 
     public String getAppID() {
@@ -77,5 +87,20 @@ public class RespAppParamBean {
 
     public void setAuthKey(String authKey) {
         this.authKey = authKey;
+    }
+
+    public boolean isDevStruct() {
+        return isDevStruct;
+    }
+
+    @Override
+    public String toString() {
+        return "RespAppParamBean{" +
+                "appID='" + appID + '\'' +
+                ", appSecret='" + appSecret + '\'' +
+                ", esignUrl='" + esignUrl + '\'' +
+                ", authKey='" + authKey + '\'' +
+                ", isDevStruct=" + isDevStruct +
+                '}';
     }
 }

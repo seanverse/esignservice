@@ -13,6 +13,7 @@ public final class ObjectMapperUtils {
     private static final Gson gson = new GsonBuilder().create();
 
     private ObjectMapperUtils() {
+
     }
 
     public static <T> T fromJson(String json, Type type) {

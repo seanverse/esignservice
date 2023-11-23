@@ -52,21 +52,33 @@ public class FileUploadHandle extends RequestHandlerBase implements HttpRequestH
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "400, request missing parameters.");
             return;
         }
+
+        if (this.appParam.isDevStruct()) { //配合返回demo数据以支持对接的平台取得返回结构
+            String body = String.format("{\"code\":\"%s\", \"message\":\"%s\", \"data\":{ \"fileId\":\"%s\",\"fileName\":\"%s\"} \n }",
+                    "200", "success", "8045830304", "合同xxxxxxxx.pdf");
+            try (OutputStream out = response.getOutputStream()) {
+                out.write((body).getBytes("UTF-8"));
+                out.flush();
+            }
+            return;
+        }
+
+
         JsonObject reqObj = ObjectMapperUtils.fromJson(json, JsonObject.class);
-
-        String fileUrl = reqObj.get("fileurl").getAsString();
-        String fileName = reqObj.get("filename").getAsString();
-
-        // 获取当前工作目录
-        String currentDirectory = System.getProperty("user.dir");
-        // 指定文件路径
-        String filePath = currentDirectory + java.io.File.separator + fileName;
-
-        LOGGER.info("fileUrl:{0}, fileName:{1}, localPath:{2}", fileUrl, fileName, filePath);
-        //先下载文件并写在当前用户目录中
-        LibCommUtils.downloadFile(fileUrl, filePath);
-
         try {
+            String fileUrl = reqObj.get("fileurl").getAsString();
+            String fileName = reqObj.get("filename").getAsString();
+
+            // 获取当前工作目录
+            String currentDirectory = System.getProperty("user.dir");
+            // 指定文件路径
+            String filePath = currentDirectory + java.io.File.separator + fileName;
+
+            LOGGER.info("fileUrl:{0}, fileName:{1}, localPath:{2}", fileUrl, fileName, filePath);
+            //先下载文件并写在当前用户目录中
+            LibCommUtils.downloadFile(fileUrl, filePath);
+
+
             EsignHttpResponse eResp = this.getUploadUrl(filePath);
 
             JsonObject eRespObj = ObjectMapperUtils.fromJson(eResp.getBody(), JsonObject.class);
@@ -101,17 +113,12 @@ public class FileUploadHandle extends RequestHandlerBase implements HttpRequestH
             }
             String body = String.format("{\"code\":\"%s\", \"message\":\"%s\", \"data\":{ \"fileId\":\"%s\",\"fileName\":\"%s\"} \n }",
                     uploadCode, "success", fileId, fileName);
-            OutputStream out = response.getOutputStream();
-            out.write((body).getBytes());
-            out.flush();
-            out.close();
-        } catch (EsignOPException esignOPException) {
-            LOGGER.error("文件上传失败", esignOPException);
-            ESignResponse<Object> eSignResponse = new ESignResponse<Object>(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    "文件上传失败: " + esignOPException.getMessage(), null);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, eSignResponse.toJson());
+            try (OutputStream out = response.getOutputStream()) {
+                out.write((body).getBytes("UTF-8"));
+                out.flush();
+            }
 
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             LOGGER.error("文件上传失败", e);
             ESignResponse<Object> eSignResponse = new ESignResponse<Object>(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     "文件上传失败: " + e.getMessage(), null);

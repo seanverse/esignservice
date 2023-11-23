@@ -29,9 +29,22 @@ public class SignByFileHandle extends RequestHandlerBase implements HttpRequestH
         String apiaddr = "/v3/sign-flow/create-by-file";
         EsignRequestType requestType = EsignRequestType.POST;
 
+
         String json = LibCommUtils.getReqBodyJson(request);
+        LOGGER.debug("start create-by-file jsonParm: {}", json);
+
         if (json == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "400, request missing parameters.");
+            return;
+        }
+
+        if (this.appParam.isDevStruct()) { //配合返回demo数据以支持对接的平台取得返回结构
+            String body = String.format("{\"code\":\"%s\", \"message\":\"%s\", \"data\":{ \"signFlowId\":\"%s\"} \n }",
+                    "200", "success", "flow8045830304");
+            try (OutputStream out = response.getOutputStream()) {
+                out.write((body).getBytes("UTF-8"));
+                out.flush();
+            }
             return;
         }
 
@@ -48,17 +61,9 @@ public class SignByFileHandle extends RequestHandlerBase implements HttpRequestH
             EsignHttpResponse resp = EsignHttpHelper.doCommHttp(appParam.getEsignUrl(), apiaddr,
                     requestType, jsonParam, header);
 
-            /*if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("start create-by-file jsonParm: {0} \n resp:{1}", jsonParam, resp.getBody());
-            }
-
-            ESignResponse<SignByFileHandle.FlowIdBean> retResp = ObjectMapperUtils.fromJson(resp.getBody(),
-                    new TypeToken<ESignResponse<SignByFileHandle.FlowIdBean>>() {
-            }.getType());
-            */
 
             try (OutputStream out = response.getOutputStream()) {
-                out.write((resp.getBody()).getBytes());
+                out.write((resp.getBody()).getBytes("UTF-8"));
                 out.flush();
             }
         } catch (Exception e) {

@@ -17,7 +17,7 @@ import java.util.Objects;
 
 
 public class SignFlowOPHandle extends RequestHandlerBase implements HttpRequestHandler {
-    private static final Logger LOGGER = LoggerFactory.getLogger(FileUploadHandle.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SignFlowOPHandle.class);
 
     @Override
     public void handleRequest(HttpServletRequest request, HttpServletResponse response, Context context)
@@ -30,8 +30,20 @@ public class SignFlowOPHandle extends RequestHandlerBase implements HttpRequestH
             return;
         }
 
+        //{"signFlowId": "34234-342288", "cmd": "signFlowUrge", "cmdParam": {"psnAccount": "xxx"}}
         ReqParamBean reqParam = ObjectMapperUtils.fromJson(json, ReqParamBean.class);
-        LOGGER.info("start: " + reqParam.toString());
+        LOGGER.info("start: {0}", reqParam.toString());
+
+        if (this.appParam.isDevStruct()) { //配合返回demo数据以支持对接的平台取得返回结构
+            String body = String.format("{\"code\":\"%s\", \"message\":\"%s\", \"data\": null \n }",
+                    "200", "成功");
+            try (OutputStream out = response.getOutputStream()) {
+                out.write((body).getBytes("UTF-8"));
+                out.flush();
+            }
+            return;
+        }
+
 
         String body = "";
         try {
@@ -64,16 +76,17 @@ public class SignFlowOPHandle extends RequestHandlerBase implements HttpRequestH
                     body = ObjectMapperUtils.toJson(files);
                     break;
                 default:
-                    body = "";
+                    body = String.format("{\"code\":\"%s\", \"message\":\"%s\", \"data\": null \n }",
+                            "501", "flowop cmd not found.");
                     break;
             }
             try (OutputStream out = response.getOutputStream()) {
-                out.write((body).getBytes());
+                out.write((body).getBytes("UTF-8"));
                 out.flush();
             }
-            LOGGER.info("end: {0}", body);
+            LOGGER.info("end: {}", body);
         } catch (Exception e) {
-            LOGGER.error("error: ", e);
+            LOGGER.error("sign flow operate throw error: ", e);
             ESignResponse<Object> eSignResponse = new ESignResponse<Object>(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     "Sign flow operate throw error: " + e.getMessage(), null);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, eSignResponse.toJson());

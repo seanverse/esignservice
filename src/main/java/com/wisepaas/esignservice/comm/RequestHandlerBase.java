@@ -16,6 +16,7 @@ import java.io.IOException;
  */
 public class RequestHandlerBase implements HttpRequestHandler {
     protected RespAppParamBean appParam = null;
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(RequestHandlerBase.class);
 
     @Override
     public void handleRequest(HttpServletRequest request, HttpServletResponse response, Context context)
@@ -32,9 +33,15 @@ public class RequestHandlerBase implements HttpRequestHandler {
         if (logLevel != null) {
             //改全局日志级别；否则按传递的包名或类名修改日志级别。loggerContext.getLogger(packageName)
             Logger logger = loggerContext.getLogger("root");
-            if (logger != null)
+            if (logger != null) {
                 logger.setLevel(ch.qos.logback.classic.Level.toLevel(logLevel));
+            }
 
         }
+
+        LOGGER.debug("request url: {}, requestparam: {}", request.getRequestURL(), this.appParam.toString());
+
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Content-Type", "application/json;charset=UTF-8");
     }
 }
