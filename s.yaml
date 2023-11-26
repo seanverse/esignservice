@@ -40,7 +40,7 @@ services:
         description: '文件计算md5并获取esign上传成功获得fileid，filename'
         environmentVariables: { "TZ": "Asia/Shanghai", "AUTHCODE": "BRFBN0001", "LOGLEVEL": "ALL" }
         runtime: java11
-        codeUri: ./target
+        codeUri: ./target/esignservice-1.0.jar
         handler: com.wisepaas.esignservice.FileUploadHandle::handleRequest
         memorySize: 256
         diskSize: 512
@@ -83,7 +83,7 @@ services:
         description: '测试API调通'
         environmentVariables: { "TZ": "Asia/Shanghai", "AUTHCODE": "BRFBN0001", "LOGLEVEL": "ALL" }
         runtime: java11
-        codeUri: ./target
+        codeUri: ./target/esignservice-1.0.jar
         handler: com.wisepaas.esignservice.UserCheckHandle::handleRequest
         memorySize: 128
         diskSize: 512
@@ -125,7 +125,7 @@ services:
         description: '已生成signFlow的常用操作项'
         environmentVariables: { "TZ": "Asia/Shanghai", "AUTHCODE": "BRFBN0001", "LOGLEVEL": "ALL" }
         runtime: java11
-        codeUri: ./target
+        codeUri: ./target/esignservice-1.0.jar
         handler: com.wisepaas.esignservice.SignFlowOPHandle::handleRequest
         memorySize: 128
         diskSize: 512
@@ -164,7 +164,7 @@ services:
         description: '用文件来发起签署'
         environmentVariables: { "TZ": "Asia/Shanghai", "AUTHCODE": "BRFBN0001", "LOGLEVEL": "ALL" }
         runtime: java11
-        codeUri: ./target
+        codeUri: ./target/esignservice-1.0.jar
         handler: com.wisepaas.esignservice.SignByFileHandle::handleRequest
         memorySize: 128
         diskSize: 512

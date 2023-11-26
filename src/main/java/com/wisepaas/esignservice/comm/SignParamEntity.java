@@ -270,4 +270,9 @@ public class SignParamEntity {
             this.positionY = positionY;
         }
     }
+
+
+    public String toJson() {
+        return ObjectMapperUtils.toJson(this);
+    }
 }

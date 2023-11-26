@@ -27,7 +27,7 @@ public class UserCheckHandle extends RequestHandlerBase implements HttpRequestHa
         response.setHeader("header2", "value2");
         response.setContentType("text/plain");
 
-        String body = String.format("It's OK \n Path: %s\n Uri: %s\n IP: %s\n", requestPath, requestURI, requestClientIP);
+        String body = String.format("It's OK. 网络是通的。 \n Path: %s\n Uri: %s\n IP: %s\n", requestPath, requestURI, requestClientIP);
         try (PrintWriter out = response.getWriter()) {
             out.write(body);
         }

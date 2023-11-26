@@ -18,8 +18,9 @@
             <charset>utf-8</charset>
         </encoder>
     </appender>
+
     <root level="ALL">
         <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
+       <!-- <appender-ref ref="FILE"/>-->
     </root>
 </configuration>

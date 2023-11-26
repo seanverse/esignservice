@@ -6,6 +6,7 @@ import cn.tsign.hz.enums.EsignRequestType;
 import cn.tsign.hz.exception.EsignOPException;
 import com.aliyun.fc.runtime.Context;
 import com.aliyun.fc.runtime.HttpRequestHandler;
+import com.google.gson.JsonObject;
 import com.wisepaas.esignservice.comm.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -41,17 +43,22 @@ public class SignByFileHandle extends RequestHandlerBase implements HttpRequestH
         if (this.appParam.isDevStruct()) { //配合返回demo数据以支持对接的平台取得返回结构
             String body = String.format("{\"code\":\"%s\", \"message\":\"%s\", \"data\":{ \"signFlowId\":\"%s\"} \n }",
                     "200", "success", "flow8045830304");
+
             try (OutputStream out = response.getOutputStream()) {
                 out.write((body).getBytes("UTF-8"));
                 out.flush();
             }
+            LOGGER.debug("end. dev return api body: {}", body);
             return;
         }
 
         SignParamEntity signParam = ObjectMapperUtils.fromJson(json, SignParamEntity.class);
+        LOGGER.debug("@@start fixeSignPosByRemote: {}", signParam.toJson());
         //前端一般不传入正确的签署区的位置，这里再来调用ESign的API来计算签署区位置
         this.fixeSignPosByRemote(signParam);
+        LOGGER.debug("@@end fixeSignPosByRemote: {}", signParam.toJson());
         /*--------------------*/
+
         ESignFlowRequest reqData = ESignFlowRequest.fromSignParm(signParam);
 
         String jsonParam = ObjectMapperUtils.toJson(reqData);
@@ -60,16 +67,25 @@ public class SignByFileHandle extends RequestHandlerBase implements HttpRequestH
                     jsonParam, requestType.name(), appParam.getEsignUrl(), apiaddr);
             EsignHttpResponse resp = EsignHttpHelper.doCommHttp(appParam.getEsignUrl(), apiaddr,
                     requestType, jsonParam, header);
-
-
+            //{
+            //    "code":0,
+            //    "message":"成功",
+            //    "data":{
+            //        "signFlowId":"165467****000"
+            //    }
+            //}
+            String body = resp.getBody();
+            LOGGER.debug(body);
             try (OutputStream out = response.getOutputStream()) {
-                out.write((resp.getBody()).getBytes("UTF-8"));
+                out.write(body.getBytes(StandardCharsets.UTF_8));
                 out.flush();
             }
         } catch (Exception e) {
             e.printStackTrace();
+            JsonObject jsonObject = new JsonObject();
+            jsonObject.addProperty("signFlowId", "");
             ESignResponse<Object> eSignResponse = new ESignResponse<Object>(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    "Sign flow throw error: " + e.getMessage(), null);
+                    "Sign flow throw error: " + e.getMessage(), jsonObject);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, eSignResponse.toJson());
             return;
         }

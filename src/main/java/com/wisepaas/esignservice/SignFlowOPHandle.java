@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 
@@ -35,8 +36,8 @@ public class SignFlowOPHandle extends RequestHandlerBase implements HttpRequestH
         LOGGER.info("start: {0}", reqParam.toString());
 
         if (this.appParam.isDevStruct()) { //配合返回demo数据以支持对接的平台取得返回结构
-            String body = String.format("{\"code\":\"%s\", \"message\":\"%s\", \"data\": null \n }",
-                    "200", "成功");
+            String body = String.format("{\"code\":\"%s\", \"message\":\"%s\", \"data\": {} \n }",
+                    "0", "成功");
             try (OutputStream out = response.getOutputStream()) {
                 out.write((body).getBytes("UTF-8"));
                 out.flush();
@@ -71,6 +72,10 @@ public class SignFlowOPHandle extends RequestHandlerBase implements HttpRequestH
                     ESignResponse<Object> flowEnd = SignFlowUtils.signFlowFinish(reqParam.signFlowId, this.appParam);
                     body = ObjectMapperUtils.toJson(flowEnd);
                     break;
+                case "signFlowQuery": //查询状态
+                    ESignResponse<JsonObject> flowStatus = SignFlowUtils.signFlowQuery(reqParam.signFlowId, this.appParam);
+                    body = ObjectMapperUtils.toJson(flowStatus);
+                    break;
                 case "fileDownloadUrl":
                     FileDownloadEntity files = SignFlowUtils.fileDownloadUrl(reqParam.signFlowId, this.appParam);
                     body = ObjectMapperUtils.toJson(files);
@@ -81,7 +86,7 @@ public class SignFlowOPHandle extends RequestHandlerBase implements HttpRequestH
                     break;
             }
             try (OutputStream out = response.getOutputStream()) {
-                out.write((body).getBytes("UTF-8"));
+                out.write((body).getBytes(StandardCharsets.UTF_8));
                 out.flush();
             }
             LOGGER.info("end: {}", body);

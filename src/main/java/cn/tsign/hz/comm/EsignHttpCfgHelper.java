@@ -231,9 +231,9 @@ public class EsignHttpCfgHelper {
             throw new EsignOPException("请求url地址格式错误");
         }
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("请求头:{} \n", headers);
-            LOGGER.debug("请求参数: {} \n", param);
-            LOGGER.debug("请求地址:{} \n请求方式:{} \n", reqBase.getURI(), reqType);
+            LOGGER.debug("request header:{} \n", headers);
+            LOGGER.debug("request param: {} \n", param);
+            LOGGER.debug("request URI:{} (request method:{} )\n", reqBase.getURI(), reqType);
         }
         //请求方法不是GET或者DELETE时传入body体，否则不传入。
         String[] methods = {"DELETE", "GET"};
@@ -283,29 +283,29 @@ public class EsignHttpCfgHelper {
                 LOGGER.debug("----------------------------end------------------------");
             }
         } catch (NoHttpResponseException e) {
-            throw new EsignOPException("服务器丢失了", e);
+            throw new EsignOPException("NoHttpResponseException：", e);
         } catch (SSLHandshakeException e) {
-            String msg = MessageFormat.format("SSL握手异常", e);
+            String msg = MessageFormat.format("SSL Exception: ", e);
             EsignOPException ex = new EsignOPException(msg, e);
             throw ex;
         } catch (UnknownHostException e) {
-            EsignOPException ex = new EsignOPException("服务器找不到", e);
+            EsignOPException ex = new EsignOPException("server exception: ", e);
             ex.initCause(e);
             throw ex;
         } catch (ConnectTimeoutException e) {
-            EsignOPException ex = new EsignOPException("连接超时", e);
+            EsignOPException ex = new EsignOPException("conntion timeout: ", e);
             ex.initCause(e);
             throw ex;
         } catch (SSLException e) {
-            EsignOPException ex = new EsignOPException("SSL异常", e);
+            EsignOPException ex = new EsignOPException("SSL exception: ", e);
             ex.initCause(e);
             throw ex;
         } catch (ClientProtocolException e) {
-            EsignOPException ex = new EsignOPException("请求头异常", e);
+            EsignOPException ex = new EsignOPException("request protocol exception: ", e);
             ex.initCause(e);
             throw ex;
         } catch (IOException e) {
-            EsignOPException ex = new EsignOPException("网络请求失败", e);
+            EsignOPException ex = new EsignOPException("net connetion error: ", e);
             ex.initCause(e);
             throw ex;
         } finally {
@@ -313,7 +313,7 @@ public class EsignHttpCfgHelper {
                 try {
                     res.close();
                 } catch (IOException e) {
-                    EsignOPException ex = new EsignOPException("--->>关闭请求响应失败", e);
+                    EsignOPException ex = new EsignOPException("--->>close connetion failed: ", e);
                     ex.initCause(e);
                     throw ex;
                 }

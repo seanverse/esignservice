@@ -36,10 +36,10 @@ public class RequestHandlerBase implements HttpRequestHandler {
             if (logger != null) {
                 logger.setLevel(ch.qos.logback.classic.Level.toLevel(logLevel));
             }
-
         }
 
-        LOGGER.debug("request url: {}, requestparam: {}", request.getRequestURL(), this.appParam.toString());
+        LOGGER.debug("@@************************************************@@ \n begin request url: {}, requestparam: {}",
+                request.getRequestURL(), this.appParam.toString());
 
         response.setCharacterEncoding("UTF-8");
         response.setHeader("Content-Type", "application/json;charset=UTF-8");

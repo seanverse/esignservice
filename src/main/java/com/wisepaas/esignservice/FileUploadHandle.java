@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -74,7 +75,7 @@ public class FileUploadHandle extends RequestHandlerBase implements HttpRequestH
             // 指定文件路径
             String filePath = currentDirectory + java.io.File.separator + fileName;
 
-            LOGGER.info("fileUrl:{0}, fileName:{1}, localPath:{2}", fileUrl, fileName, filePath);
+            LOGGER.info("fileUrl:{}, fileName:{}, localPath:{}", fileUrl, fileName, filePath);
             //先下载文件并写在当前用户目录中
             LibCommUtils.downloadFile(fileUrl, filePath);
 
@@ -86,7 +87,7 @@ public class FileUploadHandle extends RequestHandlerBase implements HttpRequestH
             String fileId = data.get("fileId").getAsString();
             String getUploadUrl = data.get("fileUploadUrl").getAsString();
 
-            LOGGER.info("获取文件id以及文件上传地址成功: \n fileId:{0}, fileName: {1} \n uploadUrl:{2}}",
+            LOGGER.info("获取文件id以及文件上传地址成功: \n fileId:{}, fileName: {} \n uploadUrl:{2}}",
                     fileId, fileName, getUploadUrl);
 
             //文件上传
@@ -114,7 +115,7 @@ public class FileUploadHandle extends RequestHandlerBase implements HttpRequestH
             String body = String.format("{\"code\":\"%s\", \"message\":\"%s\", \"data\":{ \"fileId\":\"%s\",\"fileName\":\"%s\"} \n }",
                     uploadCode, "success", fileId, fileName);
             try (OutputStream out = response.getOutputStream()) {
-                out.write((body).getBytes("UTF-8"));
+                out.write((body).getBytes(StandardCharsets.UTF_8));
                 out.flush();
             }
 

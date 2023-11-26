@@ -4,6 +4,7 @@ import cn.tsign.hz.comm.EsignHttpHelper;
 import cn.tsign.hz.comm.EsignHttpResponse;
 import cn.tsign.hz.enums.EsignRequestType;
 import cn.tsign.hz.exception.EsignOPException;
+import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.wisepaas.esignservice.comm.*;
 import org.slf4j.Logger;
@@ -11,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class SignFlowUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(SignFlowUtils.class);
@@ -129,6 +131,23 @@ public class SignFlowUtils {
         }.getType());
     }
 
+    public static ESignResponse<JsonObject> signFlowQuery(String signFlowId, RespAppParamBean appParam)throws EsignOPException {
+        String apiaddr = "/v3/sign-flow/" + signFlowId + "/detail";
+        String jsonParm = null;
+        EsignRequestType requestType = EsignRequestType.GET;
+        Map<String, String> header = EsignHttpHelper.signAndBuildSignAndJsonHeader(
+                appParam.getAppID(),
+                appParam.getAppSecret(),
+                jsonParm,
+                requestType.name(), appParam.getEsignUrl(),
+                apiaddr);
+        EsignHttpResponse resp = EsignHttpHelper.doCommHttp(appParam.getEsignUrl(), apiaddr,
+                requestType, jsonParm, header);
+        return ObjectMapperUtils.fromJson(resp.getBody(), new TypeToken<JsonObject>() {
+        }.getType());
+    }
+
+
     /**
      * Downloads the signed file and associated materials.
      *
@@ -163,24 +182,29 @@ public class SignFlowUtils {
     public static SignFieldPosition[] getPosByKeyword(String fileId, String[] keyword, RespAppParamBean appParam) throws EsignOPException {
         Objects.requireNonNull(keyword);
         String apiaddr = "/v3/files/" + fileId + "/keyword-positions";
-        String jsonParm = "{\"keyword\":" + Arrays.toString(keyword) + "}"; // toString会添加[]
+        String jsonParam = "{\"keywords\":[" + Arrays.stream(keyword)
+                .map(word -> "\"" + word + "\"")
+                .collect(Collectors.joining(",")) + "]}";
+
         EsignRequestType requestType = EsignRequestType.POST;
 
         Map<String, String> header = EsignHttpHelper.signAndBuildSignAndJsonHeader(appParam.getAppID(), appParam.getAppSecret(),
-                jsonParm, requestType.name(), appParam.getEsignUrl(), apiaddr);
+                jsonParam, requestType.name(), appParam.getEsignUrl(), apiaddr);
         EsignHttpResponse resp = EsignHttpHelper.doCommHttp(appParam.getEsignUrl(), apiaddr,
-                requestType, jsonParm, header);
+                requestType, jsonParam, header);
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("start getPosByKeyword jsonParm: {0} \n getPosByKeyword resp:{1}", jsonParm, resp.getBody());
+            LOGGER.debug("start getPosByKeyword jsonParm: {} \n getPosByKeyword resp:{}", jsonParam, resp.getBody());
             //            {
             //                "keywords": [
             //                "甲方盖章/签字",
             //                "乙方盖章/签字"  ]
             //            }
         }
+        String retBody = resp.getBody();
+        if (retBody == null || retBody.length() <1 ) throw new EsignOPException("getPosByKeyword don't found anything.");
 
-        PositionResponse retResp = ObjectMapperUtils.fromJson(resp.getBody(), PositionResponse.class);
+        PositionResponse retResp = ObjectMapperUtils.fromJson(retBody, PositionResponse.class);
         PositionResponse.RespData retData = retResp.getData();
         if (retData != null) {
             if (retData.getKeywordPositions() != null) {
