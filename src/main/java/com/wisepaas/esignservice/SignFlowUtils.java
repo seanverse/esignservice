@@ -131,7 +131,7 @@ public class SignFlowUtils {
         }.getType());
     }
 
-    public static ESignResponse<JsonObject> signFlowQuery(String signFlowId, RespAppParamBean appParam)throws EsignOPException {
+    public static ESignResponse<JsonObject> signFlowQuery(String signFlowId, RespAppParamBean appParam) throws EsignOPException {
         String apiaddr = "/v3/sign-flow/" + signFlowId + "/detail";
         String jsonParm = null;
         EsignRequestType requestType = EsignRequestType.GET;
@@ -184,7 +184,7 @@ public class SignFlowUtils {
         String apiaddr = "/v3/files/" + fileId + "/keyword-positions";
         String jsonParam = "{\"keywords\":[" + Arrays.stream(keyword)
                 .map(word -> "\"" + word + "\"")
-                .collect(Collectors.joining(",")) + "]}";
+                .collect(Collectors.joining(", ")) + "]}";
 
         EsignRequestType requestType = EsignRequestType.POST;
 
@@ -202,35 +202,57 @@ public class SignFlowUtils {
             //            }
         }
         String retBody = resp.getBody();
-        if (retBody == null || retBody.length() <1 ) throw new EsignOPException("getPosByKeyword don't found anything.");
+        if (retBody == null || retBody.length() < 1)
+            throw new EsignOPException("getPosByKeyword don't found anything.");
 
         PositionResponse retResp = ObjectMapperUtils.fromJson(retBody, PositionResponse.class);
-        PositionResponse.RespData retData = retResp.getData();
-        if (retData != null) {
-            if (retData.getKeywordPositions() != null) {
-                SignFieldPosition[] filedPosList = new SignFieldPosition[keyword.length];
+        if (retResp != null) {
+            //先判断有没有找到返回值
+            if (retResp.getCode() != 0) {
+                throw new EsignOPException(String.format(" keyword-positions api error:[%s] %s", retResp.getCode(), retResp.getMessage()));
+            }
 
-                PositionResponse.KeywordPosition item = null;
-                PositionResponse.Position pos = null;
-                PositionResponse.Coordinate coordinate = null;
-                List<PositionResponse.Position> posList = null;
-                SignFieldPosition.PosPoint retPosPoint = null;
-                for (int i = 0; i < retData.getKeywordPositions().size(); i++) {
-                    item = retData.getKeywordPositions().get(i);
-                    filedPosList[i] = new SignFieldPosition();
-                    filedPosList[i].setKeyword(keyword[i]);
-                    filedPosList[i].setSearchResult(item.isSearchResult());
-                    posList = new ArrayList<PositionResponse.Position>();
-                    for (int j = 0; j < item.getPositions().size(); j++) { //这是支持一个关键词可以在多个页签找到签署处
-                        pos = item.getPositions().get(j);
-                        coordinate = pos.getCoordinates().get(pos.getCoordinates().size() - 1); //TODO:目前只每页最后一个坐标
-                        retPosPoint = new SignFieldPosition.PosPoint();
-                        retPosPoint.setPage(pos.getPageNum());
-                        retPosPoint.setX(coordinate.getPositionX());
-                        retPosPoint.setY(coordinate.getPositionY());
+            PositionResponse.RespData retData = retResp.getData();
+            if (retData != null) {
+                List<PositionResponse.KeywordPosition> resultKeyPosList = retData.getKeywordPositions();
+                if (resultKeyPosList != null) {
+                    //返回用的数据结构
+                    SignFieldPosition[] returnFieldPosList = new SignFieldPosition[resultKeyPosList.size()];
+
+                    PositionResponse.KeywordPosition resultItem = null;
+                    PositionResponse.Position resultPos = null;
+                    PositionResponse.Coordinate coordinate = null;
+                    List<SignFieldPosition.PosPoint> returnPosList = null;
+                    SignFieldPosition.PosPoint retPosPoint = null;
+
+                    //遍历找到的列表，用keyword去SignFieldPosition的返回结果中查找到对应的数组
+                    for (int i = 0; i < resultKeyPosList.size(); i++) {
+                        resultItem = resultKeyPosList.get(i);
+
+                        returnFieldPosList[i] = new SignFieldPosition();
+                        returnFieldPosList[i].setKeyword(resultItem.getKeyword());
+                        returnFieldPosList[i].setSearchResult(resultItem.isSearchResult());
+                        returnPosList = new ArrayList<SignFieldPosition.PosPoint>();
+                        returnFieldPosList[i].setPoslist(returnPosList);
+
+                        for (int j = 0; j < resultItem.getPositions().size(); j++) { //这是支持一个关键词可以在多个页签找到签署处
+                            resultPos = resultItem.getPositions().get(j);
+                            coordinate = resultPos.getCoordinates().get(resultPos.getCoordinates().size() - 1); //TODO:目前只每页最后一个坐标
+                            if (coordinate != null) {
+                                retPosPoint = new SignFieldPosition.PosPoint();
+                                retPosPoint.setPage(resultPos.getPageNum());
+                                retPosPoint.setX(coordinate.getPositionX());
+                                retPosPoint.setY(coordinate.getPositionY());
+
+                                returnPosList.add(retPosPoint); //返回posList
+                            }
+                        }
                     }
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("end getPosByKeyword reusult: {} \n ", ObjectMapperUtils.toJson(returnFieldPosList));
+                    }
+                    return returnFieldPosList;
                 }
-                return filedPosList;
             }
         }
         return null;

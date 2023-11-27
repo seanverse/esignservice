@@ -104,6 +104,14 @@ public class SignByFileHandle extends RequestHandlerBase implements HttpRequestH
 
         // 先做fileId的归集
         for (SignParamEntity.Signer signer : signParam.getSigners()) {
+            //修正传入的手机号
+            String psnAccount = signer.getPsnAccount();
+            if (psnAccount != null) {
+                if (psnAccount.startsWith("+86")) {
+                    signer.setPsnAccount(psnAccount.substring(3));
+                }
+            }
+
             signer.getSignFields().forEach(signField -> {
                 String fileId = signField.getFileId();
                 keywordMap.computeIfAbsent(fileId, k -> new ArrayList<>()).add(signField);
@@ -117,31 +125,58 @@ public class SignByFileHandle extends RequestHandlerBase implements HttpRequestH
                     .collect(Collectors.toList());
             try {
                 //todo: warring:这里是远程调用
-                SignFieldPosition[] posList = SignFlowUtils.getPosByKeyword(fileId, keywordList.toArray(new String[0]), appParam);
-                //如果同一个文件内的一个关键词找到多个位置，要转换为多个SignParamEntity.SignField，以使得一份文件中多处盖章的效果
-                for (SignFieldPosition pos : posList) {
-                    SignParamEntity.SignField orginalField = signFields.stream()
-                            .filter(field -> field.getKeyword().equals(pos.getKeyword()))
-                            .findFirst().orElse(null);
-                    List<SignFieldPosition.PosPoint> posPointList = pos.getPoslist();
-                    if (orginalField != null && !posPointList.isEmpty()) {
-                        SignParamEntity.SignField copiedField = new SignParamEntity.SignField(orginalField);
-                        copiedField.setPositionPage(posPointList.get(0).getPage());
-                        copiedField.setPositionX(posPointList.get(0).getX());
-                        copiedField.setPositionY(posPointList.get(0).getY());
-                        signFields.add(copiedField);
+                SignFieldPosition[] resultPosList = SignFlowUtils.getPosByKeyword(fileId, keywordList.toArray(new String[0]), appParam);
+                if (resultPosList == null) return;
+                //LOGGER.debug("！！！ start resultPosList={}", ObjectMapperUtils.toJson(resultPosList));
 
-                        if (posPointList.size() > 1) { //有多个位置时要转换成多个SignParamEntity.SignField
-                            for (int i = 1; i < posPointList.size(); i++) {
-                                SignParamEntity.SignField additionalField = new SignParamEntity.SignField(orginalField);
-                                additionalField.setPositionPage(posPointList.get(i).getPage());
-                                additionalField.setPositionX(posPointList.get(i).getX());
-                                additionalField.setPositionY(posPointList.get(i).getY());
-                                signFields.add(additionalField);
+                HashMap<SignParamEntity.Signer, List<SignParamEntity.SignField>> signerFieldMap = new HashMap<>();
+
+                for (SignFieldPosition resultSignFieldPosition : resultPosList) {
+                    for (SignParamEntity.Signer signer : signParam.getSigners()) {
+                        //把每个位置信息在原数据中找到相应的项目修改回原数据中,由于List stream不能修改对象，所以会用一个全新List来承接，最后再一次设回。
+                        List<SignParamEntity.SignField> additionalList = new ArrayList<>();
+
+                        for (SignParamEntity.SignField originSignField : signer.getSignFields()) {
+                            if (originSignField.getKeyword().compareToIgnoreCase(resultSignFieldPosition.getKeyword()) == 0) {
+                                //找到关键词相等的则更新它的位置
+                                List<SignFieldPosition.PosPoint> resultPostList = resultSignFieldPosition.getPoslist();
+                                if (resultPostList != null && resultPostList.size() > 0) {
+                                    originSignField.setPositionPage(resultPostList.get(0).getPage());
+                                    originSignField.setPositionX(resultPostList.get(0).getX());
+                                    originSignField.setPositionY(resultPostList.get(0).getY());
+                                    //如果同一个文件内的一个关键词找到多个位置，要转换为多个SignParamEntity.SignField，以使得一份文件中多处盖章的效果
+                                    //如果是多于一个位置，则再创建新的SignField加进去，注意对象list的引用要正确
+                                    if (resultPostList.size() > 1) {
+                                        for (int i = 1; i < resultPostList.size(); i++) {
+                                            SignParamEntity.SignField additionalField = new SignParamEntity.SignField(originSignField);
+                                            additionalField.setPositionPage(resultPostList.get(i).getPage());
+                                            additionalField.setPositionX(resultPostList.get(i).getX());
+                                            additionalField.setPositionY(resultPostList.get(i).getY());
+                                            //Note: 加回原对象的集合引用类才会有效,但是原集合在stream处理中不能进行修改
+                                            //signer.getSignFields().add(additionalField);
+                                            additionalList.add(additionalField);
+                                        }
+                                    }
+                                }
                             }
                         }
-                    }
+
+                        if (additionalList.size() > 0) {
+                            signerFieldMap.computeIfAbsent(signer, k -> new ArrayList<>()).addAll(additionalList);
+                            // LOGGER.debug("！！！ add additionalList: {}", ObjectMapperUtils.toJson(additionalList));
+                            additionalList = null; //上面会重新构建
+
+                        }
+
+                    } //end for signer
+
+                } //enf for SignFieldPosition
+                //都foreach完成了才能进行additionalList的增加，这样不会影响for循环
+                if (signerFieldMap.size() > 0) {
+                    signerFieldMap.forEach((k, v) -> k.getSignFields().addAll(v));
                 }
+
+                //LOGGER.debug("！！！ end signParam={}", ObjectMapperUtils.toJson(signParam));
 
                 //todo:因为远程调用，所以调用一次后要Sleep一下吗？Sleep多久合适？
                 if (keywordMap.size() > 1) {
@@ -154,6 +189,6 @@ public class SignByFileHandle extends RequestHandlerBase implements HttpRequestH
             } catch (EsignOPException e) {
                 throw new RuntimeException(e);
             }
-        });
+        }); //end keywordMap foreach
     }
 }

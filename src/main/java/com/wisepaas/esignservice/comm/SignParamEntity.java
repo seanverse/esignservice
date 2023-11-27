@@ -158,6 +158,10 @@ public class SignParamEntity {
             return psnAccount;
         }
 
+        public void setPsnAccount(String v) {
+            this.psnAccount = v;
+        }
+
         public String getPsnName() {
             return psnName;
         }

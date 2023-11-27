@@ -48,7 +48,8 @@ public class EsignEncryption {
      * @param url
      * @return
      */
-    public static String appendSignDataString(String httpMethod, String contentMd5, String accept, String contentType, String headers, String date, String url) throws EsignOPException {
+    public static String appendSignDataString(String httpMethod, String contentMd5, String accept, String contentType,
+                                              String headers, String date, String url) throws EsignOPException {
         StringBuffer sb = new StringBuffer();
         sb.append(httpMethod).append("\n").append(accept).append("\n").append(contentMd5).append("\n")
                 .append(contentType).append("\n");

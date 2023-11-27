@@ -126,10 +126,9 @@ public class EsignHttpHelper {
         esignHeaderMap.put("X-Tsign-Open-Ca-Signature", reqSignature);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("----------------------------start------------------------");
-            LOGGER.debug("待计算body值:{}", paramStr + "\n");
-            LOGGER.debug("MD5值:{}", contentMD5 + "\n");
-            LOGGER.debug("待签名字符串:{}", message + "\n");
-            LOGGER.debug("签名值:{}", reqSignature + "\n");
+            //LOGGER.debug("body Data:{}", paramStr + "\n"); body太大了
+            LOGGER.debug("MD5:{}", contentMD5 + "\n");
+            LOGGER.debug("To be signed value:{} \n signature:{}\n", message, reqSignature);
         }
         return esignHeaderMap;
     }
