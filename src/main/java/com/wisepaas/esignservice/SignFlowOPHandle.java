@@ -24,16 +24,17 @@ public class SignFlowOPHandle extends RequestHandlerBase implements HttpRequestH
     public void handleRequest(HttpServletRequest request, HttpServletResponse response, Context context)
             throws IOException, ServletException {
         super.handleRequest(request, response, context); //基类方法一定要先执行
+
         String json = LibCommUtils.getReqBodyJson(request);
         if (json == null) {
             ESignResponse<Object> eSignResponse = new ESignResponse<Object>(500, "401, request missing parameters.", null);
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, eSignResponse.toJson());
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, eSignResponse.toJson());
             return;
         }
 
         //{"signFlowId": "34234-342288", "cmd": "signFlowUrge", "cmdParam": {"psnAccount": "xxx"}}
         ReqParamBean reqParam = ObjectMapperUtils.fromJson(json, ReqParamBean.class);
-        LOGGER.info("start: {0}", reqParam.toString());
+        LOGGER.info("start: {}", ObjectMapperUtils.toJson(reqParam));
 
         if (this.appParam.isDevStruct()) { //配合返回demo数据以支持对接的平台取得返回结构
             String body = String.format("{\"code\":\"%s\", \"message\":\"%s\", \"data\": {} \n }",
@@ -51,6 +52,9 @@ public class SignFlowOPHandle extends RequestHandlerBase implements HttpRequestH
             switch (reqParam.cmd) {
                 case "signFlowUrge"://催促
                     String psnAccount = reqParam.cmdParam.getAsJsonPrimitive("psnAccount").getAsString();
+                    if (psnAccount.startsWith("+86")) {
+                        psnAccount = psnAccount.substring(3);
+                    }
                     ESignResponse<Object> retUrge = SignFlowUtils.signFlowUrge(reqParam.signFlowId, psnAccount, this.appParam);
                     body = ObjectMapperUtils.toJson(retUrge);
                     break;
@@ -73,8 +77,7 @@ public class SignFlowOPHandle extends RequestHandlerBase implements HttpRequestH
                     body = ObjectMapperUtils.toJson(flowEnd);
                     break;
                 case "signFlowQuery": //查询状态
-                    ESignResponse<JsonObject> flowStatus = SignFlowUtils.signFlowQuery(reqParam.signFlowId, this.appParam);
-                    body = ObjectMapperUtils.toJson(flowStatus);
+                    body = SignFlowUtils.signFlowQuery(reqParam.signFlowId, this.appParam);
                     break;
                 case "fileDownloadUrl":
                     FileDownloadEntity files = SignFlowUtils.fileDownloadUrl(reqParam.signFlowId, this.appParam);
@@ -85,11 +88,11 @@ public class SignFlowOPHandle extends RequestHandlerBase implements HttpRequestH
                             "501", "flowop cmd not found.");
                     break;
             }
+            LOGGER.info("end: {}", body);
             try (OutputStream out = response.getOutputStream()) {
                 out.write((body).getBytes(StandardCharsets.UTF_8));
                 out.flush();
             }
-            LOGGER.info("end: {}", body);
         } catch (Exception e) {
             LOGGER.error("sign flow operate throw error: ", e);
             ESignResponse<Object> eSignResponse = new ESignResponse<Object>(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,

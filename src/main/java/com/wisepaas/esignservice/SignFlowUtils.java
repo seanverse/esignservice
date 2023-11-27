@@ -4,7 +4,9 @@ import cn.tsign.hz.comm.EsignHttpHelper;
 import cn.tsign.hz.comm.EsignHttpResponse;
 import cn.tsign.hz.enums.EsignRequestType;
 import cn.tsign.hz.exception.EsignOPException;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import com.wisepaas.esignservice.comm.*;
 import org.slf4j.Logger;
@@ -28,13 +30,10 @@ public class SignFlowUtils {
         // noticeTypes: 通知方式（多种方式使用英文逗号分隔）1- 短信，2 - 邮件 ，默认按照流程设置
         //psnAccount:被催签人账号标识（手机号/邮箱）
         //为空表示：催签当前轮到签署但还未签署的所有签署人
-        String jsonParm = "{\n" +
-                          "    \"noticeTypes\": \"%2$d\",\n" +
-                          "    \"urgedOperator\": {\n" +
-                          "        \"psnAccount\": \"%1$s\"\n" +
-                          "    }\n" +
-                          " }\n";
-        jsonParm = String.format(jsonParm, psnAccount, 1);
+        String jsonParm = "{\"noticeTypes\":\"1\"}"; //催所有人
+        //jsonParm = String.format(jsonParm, 1,psnAccount);
+        LOGGER.debug("signFlowUrge: {}", jsonParm);
+
         //请求方法
         EsignRequestType requestType = EsignRequestType.POST;
         //生成签名鉴权方式的的header
@@ -131,7 +130,7 @@ public class SignFlowUtils {
         }.getType());
     }
 
-    public static ESignResponse<JsonObject> signFlowQuery(String signFlowId, RespAppParamBean appParam) throws EsignOPException {
+    public static String signFlowQuery(String signFlowId, RespAppParamBean appParam) throws EsignOPException {
         String apiaddr = "/v3/sign-flow/" + signFlowId + "/detail";
         String jsonParm = null;
         EsignRequestType requestType = EsignRequestType.GET;
@@ -143,8 +142,9 @@ public class SignFlowUtils {
                 apiaddr);
         EsignHttpResponse resp = EsignHttpHelper.doCommHttp(appParam.getEsignUrl(), apiaddr,
                 requestType, jsonParm, header);
-        return ObjectMapperUtils.fromJson(resp.getBody(), new TypeToken<JsonObject>() {
-        }.getType());
+        String body = resp.getBody();
+        return body;
+
     }
 
 

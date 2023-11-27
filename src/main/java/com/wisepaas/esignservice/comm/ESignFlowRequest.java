@@ -39,19 +39,28 @@ public class ESignFlowRequest {
         }
         request.setDocuments(docs);
 
-        // 设置attachments
-        List<ESignFlowRequest.Document> attachments = new ArrayList<ESignFlowRequest.Document>();
-        for (SignParamEntity.Doc attachment : signParam.getAttachments()) {
-            ESignFlowRequest.Document document = new ESignFlowRequest.Document();
-            document.setFileId(attachment.getFileId());
-            document.setFileName(attachment.getFileName());
-            attachments.add(document);
-        }
-        request.setAttachments(attachments);
+        if (signParam.getAttachments() != null && signParam.getAttachments().size() > 0) {
+            // 设置attachments
+            List<ESignFlowRequest.Document> attachments = new ArrayList<ESignFlowRequest.Document>();
+            for (SignParamEntity.Doc attachment : signParam.getAttachments()) {
+                ESignFlowRequest.Document document = new ESignFlowRequest.Document();
+                document.setFileId(attachment.getFileId());
+                document.setFileName(attachment.getFileName());
+                attachments.add(document);
+            }
+            request.setAttachments(attachments);
+        } else
+            request.setAttachments(null);
 
         // 设置signFlowConfig
         ESignFlowRequest.SignFlowConfig signFlowConfig = new ESignFlowRequest.SignFlowConfig(signParam.getSignFlowTitle());
         signFlowConfig.setSignFlowExpireTime(signParam.getSignFlowExpireTime());
+        signFlowConfig.autoFinish = signParam.isAutoFinish();
+        signFlowConfig.notifyUrl = signParam.getNotifyUrl();
+        signFlowConfig.redirectConfig = new RedirectConfig();
+        //signFlowConfig.redirectConfig.setRedirectType(signParam.getRedirectType());
+        signFlowConfig.redirectConfig.setRedirectUrl(signParam.getRedirectUrl());
+        signFlowConfig.autoStart = signParam.isAutoFinish();//自动结束也自动开始，后续需要再调整传值
         request.setSignFlowConfig(signFlowConfig);
 
         // 设置signers
@@ -73,21 +82,31 @@ public class ESignFlowRequest {
             // 设置signerType
             signer.setSignerType(signerParam.getSignerType());
 
-            // 设置psnSignerInfo或orgSignerInfo
+            // 设置psnSignerInfo或orgSignerInfo  签署方类型，0 - 个人，1 - 机构，2 - 法定代表人
             if (signerParam.getSignerType() == 1) {
+                //组织机构证件类型，可选值如下：
+                // CRED_ORG_USCC - 统一社会信用代码
+                // CRED_ORG_REGCODE - 工商注册号
+                ESignFlowRequest.OrgInfo orgInfo = new ESignFlowRequest.OrgInfo(signerParam.getOrginfo().getOrgCardId(), "CRED_ORG_USCC");
+                ESignFlowRequest.OrgSignerInfo orgSignerInfo = new ESignFlowRequest.OrgSignerInfo(signerParam.getOrginfo().getOrgName(), orgInfo);
+                TransactorInfo transactorInfo = new TransactorInfo();
+                transactorInfo.psnAccount = signerParam.getPsnAccount();
+                ESignFlowRequest.PsnInfo innerPsnInfo = new ESignFlowRequest.PsnInfo(signerParam.getPsnName(), signerParam.getPsnIDCard(), null); //身份证类型让平台自行选择
+                transactorInfo.psnInfo = innerPsnInfo;
+                orgSignerInfo.setTransactorInfo(transactorInfo);
+                signer.setOrgSignerInfo(orgSignerInfo);
+            } else { // 0-个人时
+                //不管何时类型都会传入psnAccount
                 ESignFlowRequest.PsnSignerInfo psnInfo = new ESignFlowRequest.PsnSignerInfo();
                 psnInfo.setPsnAccount(signerParam.getPsnAccount());
-                ESignFlowRequest.PsnInfo innerPsnInfo = new ESignFlowRequest.PsnInfo(signerParam.getPsnName(), signerParam.getPsnIDCard(), null);
+                ESignFlowRequest.PsnInfo innerPsnInfo = new ESignFlowRequest.PsnInfo(signerParam.getPsnName(), signerParam.getPsnIDCard(), null); //身份证类型让平台自行选择
                 psnInfo.setPsnInfo(innerPsnInfo);
                 signer.setPsnSignerInfo(psnInfo);
-            } else {
-                ESignFlowRequest.OrgInfo orgInfo = new ESignFlowRequest.OrgInfo(signerParam.getOrginfo().getOrgCardId(), null);
-                ESignFlowRequest.OrgSignerInfo orgSignerInfo = new ESignFlowRequest.OrgSignerInfo(signerParam.getOrginfo().getOrgName(), orgInfo);
-                signer.setOrgSignerInfo(orgSignerInfo);
             }
 
             // 设置signFields
-            List<ESignFlowRequest.SignField> fields = new ArrayList<ESignFlowRequest.SignField>();
+            List<ESignFlowRequest.SignField> signFieldList = new ArrayList<ESignFlowRequest.SignField>();
+            //至少有一项
             for (SignParamEntity.SignField fieldParam : signerParam.getSignFields()) {
                 ESignFlowRequest.SignField field = new ESignFlowRequest.SignField();
                 field.setCustomBizNum(fieldParam.getCustomBizNum());
@@ -110,9 +129,9 @@ public class ESignFlowRequest {
                     signDateConfig.setSignDatePositionY(fieldParam.getPositionY() + 96);
                 }
                 field.setSignDateConfig(signDateConfig);
-                fields.add(field);
+                signFieldList.add(field);
             }
-            signer.setSignFields(fields);
+            signer.setSignFields(signFieldList);
             signers.add(signer);
         }
         request.setSigners(signers);
@@ -416,9 +435,19 @@ public class ESignFlowRequest {
         private String orgName;
         private OrgInfo orgInfo;
 
+        private TransactorInfo transactorInfo;
+
         public OrgSignerInfo(String orgName, OrgInfo orgInfo) {
             this.orgName = orgName;
             this.orgInfo = orgInfo;
+        }
+
+        public TransactorInfo getTransactorInfo() {
+            return transactorInfo;
+        }
+
+        public void setTransactorInfo(TransactorInfo transactorInfo) {
+            this.transactorInfo = transactorInfo;
         }
 
         public String getOrgName() {
@@ -467,6 +496,9 @@ public class ESignFlowRequest {
     public static class TransactorInfo {
         private String psnAccount;
         private PsnInfo psnInfo;
+
+        public TransactorInfo() {
+        }
 
         public TransactorInfo(String psnAccount, PsnInfo psnInfo) {
             this.psnAccount = psnAccount;

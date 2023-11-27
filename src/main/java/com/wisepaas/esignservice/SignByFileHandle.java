@@ -53,16 +53,18 @@ public class SignByFileHandle extends RequestHandlerBase implements HttpRequestH
         }
 
         SignParamEntity signParam = ObjectMapperUtils.fromJson(json, SignParamEntity.class);
-        LOGGER.debug("@@start fixeSignPosByRemote: {}", signParam.toJson());
+        LOGGER.debug("@@ before fixeSignPosByRemote: {}", signParam.toJson());
         //前端一般不传入正确的签署区的位置，这里再来调用ESign的API来计算签署区位置
         this.fixeSignPosByRemote(signParam);
-        LOGGER.debug("@@end fixeSignPosByRemote: {}", signParam.toJson());
+        LOGGER.debug("@@ after fixeSignPosByRemote: {}", signParam.toJson());
         /*--------------------*/
 
-        ESignFlowRequest reqData = ESignFlowRequest.fromSignParm(signParam);
-
-        String jsonParam = ObjectMapperUtils.toJson(reqData);
         try {
+            ESignFlowRequest reqData = ESignFlowRequest.fromSignParm(signParam);
+
+            String jsonParam = ObjectMapperUtils.toJson(reqData);
+            LOGGER.debug("@@ after Fill ESignFlowRequest: {}", jsonParam);
+
             Map<String, String> header = EsignHttpHelper.signAndBuildSignAndJsonHeader(appParam.getAppID(), appParam.getAppSecret(),
                     jsonParam, requestType.name(), appParam.getEsignUrl(), apiaddr);
             EsignHttpResponse resp = EsignHttpHelper.doCommHttp(appParam.getEsignUrl(), apiaddr,
@@ -75,13 +77,14 @@ public class SignByFileHandle extends RequestHandlerBase implements HttpRequestH
             //    }
             //}
             String body = resp.getBody();
-            LOGGER.debug(body);
+            LOGGER.debug("@@ create-by-file response body: {}", body);
+
             try (OutputStream out = response.getOutputStream()) {
                 out.write(body.getBytes(StandardCharsets.UTF_8));
                 out.flush();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             JsonObject jsonObject = new JsonObject();
             jsonObject.addProperty("signFlowId", "");
             ESignResponse<Object> eSignResponse = new ESignResponse<Object>(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
@@ -111,6 +114,7 @@ public class SignByFileHandle extends RequestHandlerBase implements HttpRequestH
                     signer.setPsnAccount(psnAccount.substring(3));
                 }
             }
+            if (signer.getSignOrder() < 1) signer.setSignOrder(1);
 
             signer.getSignFields().forEach(signField -> {
                 String fileId = signField.getFileId();

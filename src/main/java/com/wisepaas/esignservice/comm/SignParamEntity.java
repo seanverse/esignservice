@@ -145,6 +145,10 @@ public class SignParamEntity {
         public int getSignOrder() {
             return signOrder;
         }
+        public void setSignOrder(int order)
+        {
+            this.signOrder = order;
+        }
 
         public int getSignerType() {
             return signerType;
