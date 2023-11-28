@@ -57,9 +57,11 @@ public class ESignFlowRequest {
         signFlowConfig.setSignFlowExpireTime(signParam.getSignFlowExpireTime());
         signFlowConfig.autoFinish = signParam.isAutoFinish();
         signFlowConfig.notifyUrl = signParam.getNotifyUrl();
-        signFlowConfig.redirectConfig = new RedirectConfig();
-        //signFlowConfig.redirectConfig.setRedirectType(signParam.getRedirectType());
-        signFlowConfig.redirectConfig.setRedirectUrl(signParam.getRedirectUrl());
+        if (signParam.getRedirectUrl()!=null) {
+            signFlowConfig.redirectConfig = new RedirectConfig();
+            //signFlowConfig.redirectConfig.setRedirectType(signParam.getRedirectType());
+            signFlowConfig.redirectConfig.setRedirectUrl(signParam.getRedirectUrl());
+        }
         signFlowConfig.autoStart = signParam.isAutoFinish();//自动结束也自动开始，后续需要再调整传值
         request.setSignFlowConfig(signFlowConfig);
 
@@ -113,7 +115,9 @@ public class ESignFlowRequest {
                 field.setFileId(fieldParam.getFileId());
 
                 ESignFlowRequest.NormalSignFieldConfig config = new ESignFlowRequest.NormalSignFieldConfig();
-                config.setSignFieldStyle(fieldParam.getSignFieldStyle());
+                int signFieldStyle = fieldParam.getSignFieldStyle();
+                config.setSignFieldStyle(signFieldStyle);
+                //签章区样式 1 - 单页签章，2 - 骑缝签章(只需要Y)
                 ESignFlowRequest.SignFieldPosition position = new ESignFlowRequest.SignFieldPosition();
                 position.setPositionPage(fieldParam.getPositionPage());
                 position.setPositionX(fieldParam.getPositionX());
@@ -121,14 +125,16 @@ public class ESignFlowRequest {
                 config.setSignFieldPosition(position);
                 field.setNormalSignFieldConfig(config);
                 //set SignDateConfig
-                ESignFlowRequest.SignDateConfig signDateConfig = new ESignFlowRequest.SignDateConfig();
-                signDateConfig.setDateFormat("yyyy-MM-dd");
-                signDateConfig.setShowSignDate(1);
-                if (signerParam.getSignOrder() == 1) { //甲方y位置向下，x 不变
-                    signDateConfig.setSignDatePositionX(fieldParam.getPositionX());
-                    signDateConfig.setSignDatePositionY(fieldParam.getPositionY() + 96);
+                if (fieldParam.isShowSignDate()) { //需要盖章日期时
+                    ESignFlowRequest.SignDateConfig signDateConfig = new ESignFlowRequest.SignDateConfig();
+                    signDateConfig.setDateFormat("yyyy-MM-dd");
+                    signDateConfig.setShowSignDate(2);//0 - 不显示，1 - 固定位置显示，2 - 不固定位置,默认在签章下方
+                    //  if (signerParam.getSignOrder() == 1) { //甲方y位置向下，x 不变
+                    //      signDateConfig.setSignDatePositionX(fieldParam.getPositionX());
+                    //      signDateConfig.setSignDatePositionY(fieldParam.getPositionY() + 96);
+                    //  }
+                    field.setSignDateConfig(signDateConfig);
                 }
-                field.setSignDateConfig(signDateConfig);
                 signFieldList.add(field);
             }
             signer.setSignFields(signFieldList);

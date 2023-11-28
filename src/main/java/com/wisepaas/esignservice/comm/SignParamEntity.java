@@ -204,6 +204,9 @@ public class SignParamEntity {
         private String customBizNum;
         private String fileId;
         private String keyword;
+
+        private  boolean showSignDate;
+
         private int signFieldStyle;
         private int positionPage;
         private double positionX;
@@ -216,6 +219,7 @@ public class SignParamEntity {
             this.customBizNum = src.customBizNum;
             this.fileId = src.fileId;
             this.keyword = src.keyword;
+            this.showSignDate= src.showSignDate;
             this.signFieldStyle = src.signFieldStyle;
             this.positionPage = src.positionPage;
             this.positionX = src.positionX;
@@ -253,6 +257,15 @@ public class SignParamEntity {
         public void setSignFieldStyle(int signFieldStyle) {
             this.signFieldStyle = signFieldStyle;
         }
+
+        public  boolean isShowSignDate() {
+            return showSignDate;
+        }
+
+        public void setShowSignDate(boolean showSignDate) {
+            this.showSignDate = showSignDate;
+        }
+
 
         public int getPositionPage() {
             return positionPage;

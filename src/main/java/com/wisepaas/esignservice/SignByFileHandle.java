@@ -56,6 +56,7 @@ public class SignByFileHandle extends RequestHandlerBase implements HttpRequestH
         LOGGER.debug("@@ before fixeSignPosByRemote: {}", signParam.toJson());
         //前端一般不传入正确的签署区的位置，这里再来调用ESign的API来计算签署区位置
         this.fixeSignPosByRemote(signParam);
+        this.ReCalcSignFieldPos(signParam);
         LOGGER.debug("@@ after fixeSignPosByRemote: {}", signParam.toJson());
         /*--------------------*/
 
@@ -194,5 +195,44 @@ public class SignByFileHandle extends RequestHandlerBase implements HttpRequestH
                 throw new RuntimeException(e);
             }
         }); //end keywordMap foreach
+    }
+
+    public void ReCalcSignFieldPos(SignParamEntity signParam) throws RuntimeException {
+        int signerNo = 0;
+
+        for (SignParamEntity.Signer signer : signParam.getSigners())
+        { //一般就是2个signer
+            List<SignParamEntity.SignField> signFieldList = signer.getSignFields();
+            if (signFieldList == null || signFieldList.size() < 1)
+                continue;
+
+            //暂存新的signField,for完成后再添加进去
+            //HashMap<SignParamEntity.Signer, List<SignParamEntity.SignField>> signerFieldMap = new HashMap<>();
+
+            int count = signFieldList.size();
+            SignParamEntity.SignField originSignField = signFieldList.get(count-1);
+            //1、关键词位置计算时是把章盖在中间，+96是为了章可以偏右一部分更符合当前合同的风格，要么就是调整合同的关键词存储位置
+            originSignField.setPositionX(originSignField.getPositionX() + 96);
+            originSignField.setShowSignDate(true);//正本最后落款区添加上日期
+
+            //2、通过originSignField复制产生一个骑缝章位置，骑缝章位置重点是Y的位置，
+            // 但是按盖章位置Y，甲乙双方会重叠，因此其中是盖章的Y，其二用这个位置向上偏移
+            //A4纸的尺寸是210mm×297mm。
+            //分辨率是72像素/英寸时，A4纸的尺寸的图像的像素是595×842（推荐用这个大小比例）。
+            SignParamEntity.SignField pagingSealField = new SignParamEntity.SignField(originSignField);
+            pagingSealField.setShowSignDate(false);
+            pagingSealField.setSignFieldStyle(2); //1 - 单页签章，2 - 骑缝签章
+            pagingSealField.setPositionX(0);//x 不用管
+            pagingSealField.setKeyword("");
+            //Y + 第几个签署者 * 章的高度  (签署方类型，0 - 个人，1 - 机构，2 - 法定代表人)
+            //int signerHeight = signer.getSignerType() == 1 ? 120 : 64; //机构章的高度定为120，个人在64.
+            //直接记为120px来判断，重叠或间隔并不影响
+            pagingSealField.setPositionY(originSignField.getPositionY() + signerNo * 120);
+            signer.getSignFields().add(pagingSealField);
+            //在foreach,signFiels[]时，要先存起来，最后处理
+            //signerFieldMap.computeIfAbsent(signer, k -> new ArrayList<>()).add(pagingSealField);
+
+            signerNo++;
+        }
     }
 }
