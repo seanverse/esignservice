@@ -229,6 +229,7 @@ public class SignByFileHandle extends RequestHandlerBase implements HttpRequestH
             //直接记为120px来判断，重叠或间隔并不影响
             pagingSealField.setPositionY(originSignField.getPositionY() + signerNo * 120);
             signer.getSignFields().add(pagingSealField);
+
             //在foreach,signFiels[]时，要先存起来，最后处理
             //signerFieldMap.computeIfAbsent(signer, k -> new ArrayList<>()).add(pagingSealField);
 

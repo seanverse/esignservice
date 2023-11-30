@@ -29,9 +29,8 @@ public class SignFlowUtils {
         //请求参数body体,json格式。get或者delete请求时jsonString传空json:"{}"或者null
         // noticeTypes: 通知方式（多种方式使用英文逗号分隔）1- 短信，2 - 邮件 ，默认按照流程设置
         //psnAccount:被催签人账号标识（手机号/邮箱）
-        //为空表示：催签当前轮到签署但还未签署的所有签署人
-        String jsonParm = String.format("{\"noticeTypes\":\"%s\",\"urgedOperator\":{\"psnAccount\":\"%s\"}}",
-                                 1, psnAccount);
+        psnAccount = null;//为空表示：催签当前轮到签署但还未签署的所有签署人
+        String jsonParm = String.format("{\"noticeTypes\":\"%s\",\"urgedOperator\":{\"psnAccount\":\"%s\"}}", 1, psnAccount);
         LOGGER.debug("signFlowUrge: {}", jsonParm);
 
         //请求方法
