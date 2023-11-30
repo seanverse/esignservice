@@ -30,15 +30,15 @@ public class SignFlowUtils {
         // noticeTypes: 通知方式（多种方式使用英文逗号分隔）1- 短信，2 - 邮件 ，默认按照流程设置
         //psnAccount:被催签人账号标识（手机号/邮箱）
         //为空表示：催签当前轮到签署但还未签署的所有签署人
-        String jsonParm = "{\"noticeTypes\":\"1\"}"; //催所有人
-        //jsonParm = String.format(jsonParm, 1,psnAccount);
+        String jsonParm = String.format("{\"noticeTypes\":\"%s\",\"urgedOperator\":{\"psnAccount\":\"%s\"}}",
+                                 1, psnAccount);
         LOGGER.debug("signFlowUrge: {}", jsonParm);
 
         //请求方法
         EsignRequestType requestType = EsignRequestType.POST;
         //生成签名鉴权方式的的header
         Map<String, String> header = EsignHttpHelper.signAndBuildSignAndJsonHeader(appParam.getAppID(), appParam.getAppSecret(),
-                jsonParm, appParam.getEsignUrl(), requestType.name(), apiaddr);
+                jsonParm, requestType.name(), appParam.getEsignUrl(), apiaddr);
         //发起接口请求
         EsignHttpResponse resp = EsignHttpHelper.doCommHttp(appParam.getEsignUrl(), apiaddr, requestType, jsonParm, header);
         return ObjectMapperUtils.fromJson(resp.getBody(), new TypeToken<ESignResponse<Object>>() {
