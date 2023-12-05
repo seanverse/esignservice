@@ -93,7 +93,8 @@ public class ESignFlowRequest {
                 ESignFlowRequest.OrgSignerInfo orgSignerInfo = new ESignFlowRequest.OrgSignerInfo(signerParam.getOrginfo().getOrgName(), orgInfo);
                 TransactorInfo transactorInfo = new TransactorInfo();
                 transactorInfo.psnAccount = signerParam.getPsnAccount();
-                ESignFlowRequest.PsnInfo innerPsnInfo = new ESignFlowRequest.PsnInfo(signerParam.getPsnName(), signerParam.getPsnIDCard(), null); //身份证类型让平台自行选择
+                //signerParam.getPsnIDCard()不传入，仿止平台判断和企业方的人的方式不一样,身份证类型让平台自行选择
+                ESignFlowRequest.PsnInfo innerPsnInfo = new ESignFlowRequest.PsnInfo(signerParam.getPsnName(), "", null);
                 transactorInfo.psnInfo = innerPsnInfo;
                 orgSignerInfo.setTransactorInfo(transactorInfo);
                 signer.setOrgSignerInfo(orgSignerInfo);
@@ -101,7 +102,8 @@ public class ESignFlowRequest {
                 //不管何时类型都会传入psnAccount
                 ESignFlowRequest.PsnSignerInfo psnInfo = new ESignFlowRequest.PsnSignerInfo();
                 psnInfo.setPsnAccount(signerParam.getPsnAccount());
-                ESignFlowRequest.PsnInfo innerPsnInfo = new ESignFlowRequest.PsnInfo(signerParam.getPsnName(), signerParam.getPsnIDCard(), null); //身份证类型让平台自行选择
+                //signerParam.getPsnIDCard()不传入，仿止平台判断和企业方的人的方式不一样
+                ESignFlowRequest.PsnInfo innerPsnInfo = new ESignFlowRequest.PsnInfo(signerParam.getPsnName(), "", null); //身份证类型让平台自行选择
                 psnInfo.setPsnInfo(innerPsnInfo);
                 signer.setPsnSignerInfo(psnInfo);
             }
